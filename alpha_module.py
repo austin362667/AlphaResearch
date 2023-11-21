@@ -2,7 +2,7 @@ import os, typing, json
 from enum import Enum
 from pandas import DataFrame
 
-DATABASE = "/Users/austin/Documents/WQ_Research_Infra"
+DATABASE = "./"
 PNL_FOLDER = os.path.join(DATABASE, 'pnl')
 TVR_FOLDER = os.path.join(DATABASE, 'tvr')
 
