@@ -243,10 +243,10 @@ def sigmoid(x):
 def objective_scoring(raw_val, baseline, reverse = False):
     if reverse:
         val = 1 - raw_val/baseline
-        return sigmoid(val) if val >= 0 else val*2
+        return (sigmoid(val)-0.5) if val >= 0 else (sigmoid(val)-0.5)*2
     else:
         val = raw_val/baseline - 1
-        return sigmoid(val) if val >= 0 else val*2
+        return (sigmoid(val)-0.5) if val >= 0 else (sigmoid(val)-0.5)*2
     
 def crossover(parent_a, parent_b):
     merged_tree = merge_trees(parent_a, parent_b)
