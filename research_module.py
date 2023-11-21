@@ -13,17 +13,17 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'EUR'
-UNIVERSE = 'TOP1200'
+REGION = 'TWN'
+UNIVERSE = 'TOP500'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'SLOW'
+NEUTRALIZATION = 'SUBINDUSTRY'
 
 DATASET_ID = 'other176'
 
 POPULATION_SIZE = 200
 GENERATION_EPOCH = 30
-MUTATION_RATE = 0.2
+MUTATION_RATE = 0.3
 
 
 
