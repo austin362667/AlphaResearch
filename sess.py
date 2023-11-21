@@ -143,6 +143,7 @@ class BrainSession:
                         running_alpha.save_to_disk()
                         os.remove(running_file)
             time.sleep(10)
-
-worker = BrainSession()
-worker.stream_simulation(max_sim=10)
+while True:
+    worker = BrainSession()
+    worker.stream_simulation(max_sim=10)
+    time.sleep(30)
