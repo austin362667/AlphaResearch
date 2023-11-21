@@ -39,7 +39,8 @@ def start_session():
     lstatus = None
     cnt = 0
     stime = 0
-    while lstatus is None or lstatus == requests.status_codes.codes.unauthorized or stime == 0: 
+    while lstatus is None or lstatus == requests.status_codes.codes.unauthorized or stime == 0:
+        time.sleep(5)
         s = requests.Session()
         credential_email = os.environ.get('WQ_CREDENTIAL_EMAIL')
         credential_password = os.environ.get('WQ_CREDENTIAL_PASSWORD')
