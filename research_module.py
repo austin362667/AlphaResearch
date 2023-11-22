@@ -21,9 +21,9 @@ NEUTRALIZATION = 'SUBINDUSTRY'
 
 DATASET_ID = 'other176'
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 100
 GENERATION_EPOCH = 30
-MUTATION_RATE = 0.3
+MUTATION_RATE = 0.2
 
 
 
@@ -238,15 +238,15 @@ def roulette_wheel(population):
     return population[select]
 
 def sigmoid(x):
-    return 1 / (1+math.exp(-x))
+    return 1 / (1+math.exp(-x+0.0001))
 
 def objective_scoring(raw_val, baseline, reverse = False):
     if reverse:
         val = 1 - raw_val/baseline
-        return (sigmoid(val)-0.5) if val >= 0 else (sigmoid(val)-0.5)*2
+        return (sigmoid(val)-0.5) if val >= 0 else (sigmoid(val)-0.5)*3
     else:
         val = raw_val/baseline - 1
-        return (sigmoid(val)-0.5) if val >= 0 else (sigmoid(val)-0.5)*2
+        return (sigmoid(val)-0.5) if val >= 0 else (sigmoid(val)-0.5)*3
     
 def crossover(parent_a, parent_b):
     merged_tree = merge_trees(parent_a, parent_b)
