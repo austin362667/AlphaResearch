@@ -238,7 +238,8 @@ def roulette_wheel(population):
     return population[select]
 
 def sigmoid(x):
-    return 1 / (1+math.exp(-x+0.0001))
+    epsilon = 1e-15
+    return 1 / (1+np.exp(-x+epsilon))
 
 def objective_scoring(raw_val, baseline, reverse = False):
     if reverse:
