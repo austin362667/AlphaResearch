@@ -13,17 +13,17 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'EUR'
-UNIVERSE = 'TOP1200'
+REGION = 'USA'
+UNIVERSE = 'TOP3000'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'COUNTRY'
+NEUTRALIZATION = 'SUBINDUSTRY'
 
 DATASET_ID = 'model30'
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 100
 GENERATION_EPOCH = 10
-MUTATION_RATE = 0.3
+MUTATION_RATE = 0.2
 
 
 
@@ -359,7 +359,7 @@ def evolution(verbose=False):
                 is_stats = {'sharpe': annualized_sharpe_ratio, 'turnover': average_daily_turnover, 'drawdown': max_drawdown, 'returns': final_returns} # alpha_stats['is']
 
                 if is_stats['sharpe']:
-                    score = (objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.01, True) + objective_scoring(float(is_stats['returns']), 0.5))# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+                    score = (objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['returns']), 0.4))# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
                 else:
                     score = -9999
 
