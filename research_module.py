@@ -21,7 +21,7 @@ NEUTRALIZATION = 'COUNTRY'
 
 DATASET_ID = 'model30'
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 20
 GENERATION_EPOCH = 10
 MUTATION_RATE = 0.3
 
@@ -254,7 +254,7 @@ def crossover(parent_a, parent_b):
     return merged_tree
 
 def gen_expression(x_lst=[], y_lst=[], ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
-    return OP(x_lst=[OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=ts_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)
+    return OP(x_lst=[OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=ts_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
 
 def gen_population(size):
     population = []
@@ -305,7 +305,14 @@ def annualized_sharpe(pnl_df):
 
     return annualized_sharpe_ratio
 
+def calculate_max_drawdown(cumulative_pnl):
+    cumulative_max = cumulative_pnl.cummax()
+
+    drawdown = cumulative_pnl - cumulative_max
     
+    max_drawdown = -1*drawdown.min()
+
+    return max_drawdown
 
 def evolution(verbose=False):
     
@@ -343,15 +350,16 @@ def evolution(verbose=False):
 
             self_is_pnl.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
             annualized_sharpe_ratio = annualized_sharpe(self_is_pnl)
+            max_drawdown = calculate_max_drawdown(self_is_pnl['Pnl']) / 20000000
             
             average_daily_turnover = self_is_tvr['Turnover'].mean()
-
+            final_returns = self_is_pnl['Pnl'].iloc[-1] / 20000000
             alpha_stats = complete_alpha.response_data
             if annualized_sharpe_ratio > 0 and average_daily_turnover > 0:
-                is_stats = {'sharpe': annualized_sharpe_ratio, 'turnover': average_daily_turnover} # alpha_stats['is']
+                is_stats = {'sharpe': annualized_sharpe_ratio, 'turnover': average_daily_turnover, 'drawdown': max_drawdown, 'returns': final_returns} # alpha_stats['is']
 
                 if is_stats['sharpe']:
-                    score = (objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True)) # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+                    score = (objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.01, True) + objective_scoring(float(is_stats['returns']), 0.5))# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
                 else:
                     score = -9999
 
@@ -364,7 +372,7 @@ def evolution(verbose=False):
         
         for v in alpha_rank_batch:
             # print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{v['fitness']}\t{v['sharpe']}\t{round(v['turnover']*100,2)}\t{round(v['returns']*100,2)}\t{round(v['drawdown']*100,2)}\t{round(v['margin']*10000,2)}") #\t{v['corr']>0.995}")
-            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{round(v['sharpe'], 2)}\t{round(v['turnover']*100,2)}") #\t{v['corr']>0.995}")
+            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{round(v['sharpe'], 2)}\t{round(v['turnover']*100,2)}\t{round(v['drawdown']*100,2)}\t{round((v['returns']/8)*100,2)}") #\t{v['corr']>0.995}")
 
         children_population = []
         # POPULATION_SIZE -= 5
