@@ -13,13 +13,13 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'USA'
-UNIVERSE = 'TOP3000'
+REGION = 'EUR'
+UNIVERSE = 'TOP1200'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'SUBINDUSTRY'
+NEUTRALIZATION = 'COUNTRY'
 
-DATASET_ID = 'model30'
+DATASET_ID = 'other176'
 
 POPULATION_SIZE = 100
 GENERATION_EPOCH = 10
@@ -96,7 +96,7 @@ grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, univ
 data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 
 
-x_lst = [ f"ts_backfill(({d}), 22)" for d in data_lst ] # vec_avg()
+x_lst = [ f"ts_backfill(arc_tan({d}), 22)" for d in data_lst ] # vec_avg()
 
 day_lst = [2,3,4,5,10,22,44,66,132,252]
 grp_lst =  [ f"densify(group_coalesce({g}, subindustry))" for g in grp_data_lst ] # +other455+pv30 # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
@@ -254,7 +254,7 @@ def crossover(parent_a, parent_b):
     return merged_tree
 
 def gen_expression(x_lst=[], y_lst=[], ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
-    return OP(x_lst=[OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=ts_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
+    return OP(x_lst=[OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=ts_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
 
 def gen_population(size):
     population = []
