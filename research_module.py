@@ -21,7 +21,7 @@ NEUTRALIZATION = 'COUNTRY'
 
 DATASET_ID = 'other176'
 
-POPULATION_SIZE = 100
+POPULATION_SIZE = 200
 GENERATION_EPOCH = 10
 MUTATION_RATE = 0.2
 
@@ -96,7 +96,7 @@ grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, univ
 data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 
 
-x_lst = [ f"ts_backfill(arc_tan({d}), 22)" for d in data_lst ] # vec_avg()
+x_lst = [ f"ts_backfill(({d}), 252)" for d in data_lst ] # vec_avg()
 
 day_lst = [2,3,4,5,10,22,44,66,132,252]
 grp_lst =  [ f"densify(group_coalesce({g}, subindustry))" for g in grp_data_lst ] # +other455+pv30 # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
@@ -254,7 +254,7 @@ def crossover(parent_a, parent_b):
     return merged_tree
 
 def gen_expression(x_lst=[], y_lst=[], ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
-    return OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=ts_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)
+    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=ts_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst), y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
 
 def gen_population(size):
     population = []
@@ -342,8 +342,8 @@ def evolution(verbose=False):
             tvr_df = pd.read_csv(complete_alpha.response_data['tvr_path'])
 
             # is_cutoff = '2019-01-01'
-            self_is_pnl, self_os_pnl = pnl_df.iloc[:int(len(pnl_df)*0.8),:], pnl_df.iloc[int(len(pnl_df)*0.8):,:] #pnl_df.loc[pnl_df.index < is_cutoff], pnl_df.loc[pnl_df.index >= is_cutoff]
-            self_is_tvr, self_os_tvr = tvr_df.iloc[:int(len(tvr_df)*0.8),:], tvr_df.iloc[int(len(tvr_df)*0.8):,:] #tvr_df.loc[tvr_df.index < is_cutoff], tvr_df.loc[tvr_df.index >= is_cutoff]
+            self_is_pnl, self_os_pnl = pnl_df.iloc[:int(len(pnl_df)*0.9),:], pnl_df.iloc[int(len(pnl_df)*0.9):,:] #pnl_df.loc[pnl_df.index < is_cutoff], pnl_df.loc[pnl_df.index >= is_cutoff]
+            self_is_tvr, self_os_tvr = tvr_df.iloc[:int(len(tvr_df)*0.9),:], tvr_df.iloc[int(len(tvr_df)*0.9):,:] #tvr_df.loc[tvr_df.index < is_cutoff], tvr_df.loc[tvr_df.index >= is_cutoff]
             
             
             self_is_pnl['Return'] = self_is_pnl['Pnl'].diff() / 20000000
@@ -359,7 +359,7 @@ def evolution(verbose=False):
                 is_stats = {'sharpe': annualized_sharpe_ratio, 'turnover': average_daily_turnover, 'drawdown': max_drawdown, 'returns': final_returns} # alpha_stats['is']
 
                 if is_stats['sharpe']:
-                    score = (objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['returns']), 0.4))# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+                    score = (objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['returns']), 0.5))# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
                 else:
                     score = -9999
 
@@ -375,7 +375,7 @@ def evolution(verbose=False):
             print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{round(v['sharpe'], 2)}\t{round(v['turnover']*100,2)}\t{round(v['drawdown']*100,2)}\t{round((v['returns']/8)*100,2)}") #\t{v['corr']>0.995}")
 
         children_population = []
-        # POPULATION_SIZE -= 5
+        POPULATION_SIZE -= 10
         while len(children_population) < POPULATION_SIZE:
             parent_a , parent_b = roulette_wheel([x['data'] for x in alpha_rank_batch]), roulette_wheel([x['data'] for x in alpha_rank_batch])
             child = crossover(parent_a, parent_b)
