@@ -375,7 +375,7 @@ def evolution(verbose=False):
             print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{round(v['sharpe'], 2)}\t{round(v['turnover']*100,2)}\t{round(v['drawdown']*100,2)}\t{round((v['returns']/8)*100,2)}") #\t{v['corr']>0.995}")
 
         children_population = []
-        POPULATION_SIZE -= 30
+        # POPULATION_SIZE -= 30
         while len(children_population) < POPULATION_SIZE:
             parent_a , parent_b = roulette_wheel([x['data'] for x in alpha_rank_batch]), roulette_wheel([x['data'] for x in alpha_rank_batch])
             child = crossover(parent_a, parent_b)
