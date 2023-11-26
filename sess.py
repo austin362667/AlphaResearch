@@ -1,5 +1,5 @@
 import requests
-import os, typing, time
+import os, typing, time, sys
 import pandas as pd
 from urllib.parse import urljoin
 from time import sleep
@@ -110,6 +110,7 @@ class BrainSession:
                     else:
                         print("Post simulation error: ")
                         print(post_res.json())
+                        sys.exit(0)
                     pending_alpha.save_to_disk()
                     os.remove(pending_file)
                     break
