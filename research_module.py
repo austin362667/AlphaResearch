@@ -17,12 +17,12 @@ REGION = 'EUR'
 UNIVERSE = 'TOP1200'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'COUNTRY'
+NEUTRALIZATION = 'SLOW'
 
 DATASET_ID = 'other176'
 
-POPULATION_SIZE = 1000
-GENERATION_EPOCH = 12
+POPULATION_SIZE = 500
+GENERATION_EPOCH = 10
 MUTATION_RATE = 0.2
 
 
@@ -372,7 +372,7 @@ def evolution(verbose=False):
         
         for v in alpha_rank_batch:
             # print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{v['fitness']}\t{v['sharpe']}\t{round(v['turnover']*100,2)}\t{round(v['returns']*100,2)}\t{round(v['drawdown']*100,2)}\t{round(v['margin']*10000,2)}") #\t{v['corr']>0.995}")
-            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{round(v['sharpe'], 2)}\t{round(v['turnover']*100,2)}\t{round(v['drawdown']*100,2)}\t{round((v['returns']/8)*100,2)}") #\t{v['corr']>0.995}")
+            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{round(v['sharpe'], 2)}\t{round(v['turnover']*100,2)}\t{round(v['drawdown']*100,2)}\t{round((v['returns']/9)*100,2)}") #\t{v['corr']>0.995}")
 
         children_population = []
         # POPULATION_SIZE -= 30
