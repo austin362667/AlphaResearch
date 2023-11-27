@@ -13,8 +13,8 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'EUR'
-UNIVERSE = 'TOP1200'
+REGION = 'USA'
+UNIVERSE = 'TOP3000'
 DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'SLOW'
