@@ -89,8 +89,8 @@ def get_datafields(
 
 worker_sess = start_session()
 
-other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
-pv30 = get_datafields(worker_sess, dataset_id='pv30', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+# other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+# pv30 = get_datafields(worker_sess, dataset_id='pv30', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
 
 # data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
@@ -100,7 +100,7 @@ x_lst = ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({
 y_lst = ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [2,3,4,5,7,10,15,22,44,66,132,198,252]
-grp_lst =  [ f"densify(group_coalesce({g}, sector))" for g in grp_data_lst+other455+pv30 ] # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
+grp_lst =  [ f"densify(group_coalesce({g}, sector))" for g in grp_data_lst ] # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
 
 ts1op_map = {
     'x': '({x})',
