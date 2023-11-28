@@ -277,7 +277,7 @@ def gen_population(size):
     population = []
     while len(population)<size:
         for i in range(size):
-            exp = gen_expression(x_lst=x_lst)
+            exp = gen_expression(x_lst=x_lst, y_lst=y_lst)
             population.append(exp)
         population = list(set(population))
     return population
@@ -398,7 +398,7 @@ def evolution(verbose=False):
             parent_a , parent_b = roulette_wheel([x['data'] for x in alpha_rank_batch]), roulette_wheel([x['data'] for x in alpha_rank_batch])
             child = crossover(parent_a, parent_b)
             if random.random() < MUTATION_RATE:
-                child  = gen_expression(x_lst=x_lst)
+                child  = gen_expression(x_lst=x_lst, y_lst=y_lst)
             children_population.append(child)
         
         parent_population = children_population
