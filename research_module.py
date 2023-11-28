@@ -366,8 +366,8 @@ def evolution(verbose=False):
             self_is_pnl['Return'] = self_is_pnl['Pnl'].diff() / 20000000
 
             self_is_pnl.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
-            annualized_sharpe_ratio_lt = annualized_sharpe(self_is_pnl.iloc[:int(len(self_is_pnl)*0.8),:]
-            annualized_sharpe_ratio_st = annualized_sharpe(self_is_pnl.iloc[int(len(self_is_pnl)*0.8):,:]
+            annualized_sharpe_ratio_lt = annualized_sharpe(self_is_pnl.iloc[:int(len(self_is_pnl)*0.8),:])
+            annualized_sharpe_ratio_st = annualized_sharpe(self_is_pnl.iloc[int(len(self_is_pnl)*0.8):,:])
             max_drawdown = calculate_max_drawdown(self_is_pnl['Pnl']) / 20000000
             
             average_daily_turnover = self_is_tvr['Turnover'].mean()
