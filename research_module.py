@@ -19,9 +19,9 @@ DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'SUBINDUSTRY'
 
-DATASET_ID = 'other176'
+DATASET_ID = 'other84'
 
-POPULATION_SIZE = 1000
+POPULATION_SIZE = 100
 GENERATION_EPOCH = 10
 MUTATION_RATE = 0.2
 
@@ -89,19 +89,21 @@ def get_datafields(
 
 worker_sess = start_session()
 
-# other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
-# pv30 = get_datafields(worker_sess, dataset_id='pv30', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+pv30 = get_datafields(worker_sess, dataset_id='pv30', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
 
 data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 
 
-x_lst = [ f"ts_backfill(({d}), 252)" for d in data_lst ] # vec_avg()
+x_lst = ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # vec_avg()
+y_lst = ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
-day_lst = [2,3,4,5,10,22,44,66,132,252]
-grp_lst =  [ f"densify(group_coalesce({g}, subindustry))" for g in grp_data_lst ] # +other455+pv30 # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
+day_lst = [2,3,4,5,7,10,15,22,44,66,132,198,252]
+grp_lst =  [ f"densify(group_coalesce({g}, sector))" for g in grp_data_lst+other455+pv30 ] # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
 
 ts1op_map = {
+    'x': '({x})',
     'ts_rank': 'ts_rank({x}, {d})',
     'ts_quantile_gaussian': 'ts_quantile({x}, {d}, driver="gaussian")',
     'ts_quantile_uniform': 'ts_quantile({x}, {d}, driver="uniform")',
@@ -139,6 +141,7 @@ ts1op_map = {
 }
 
 grp1op_map = {
+    'x': '({x})',
     'grp_rank': 'group_rank({x}, {g})',
     'scale': 'scale({x}, scale=1, longscale=1, shortscale=1)',
     'grp_zscore': 'group_zscore({x}, {g})',
@@ -152,8 +155,22 @@ grp1op_map = {
     'grp_div_mean': '{x}/group_mean({x}, 1, {g})',
 }
 
+diff2op_map = {
+    'x': '({x})',
+    'y': '({y})',
+    'sub': 'subtract({x}, {y})',
+    'div': 'divide({x}, {y})',
+    'mas': 'ts_mean({x}, {d})-ts_mean({y}, {d})',
+    'mad': 'ts_mean({x}, {d})/ts_mean({y}, {d})',
+    'mts': 'ts_returns({x}, {d})-ts_returns({y}, {d})',
+    'ts_reg_grp_med': 'ts_regression({x}, group_median({y}, {g}), {d})',
+    'ts_reg_grp_mean': 'ts_regression({x}, group_mean({y}, 1, {g}), {d})',
+    'ts_reg': 'ts_regression({x}, {y}, {d})',
+    'ts_reg_ret': 'ts_regression(ts_returns({x}), ts_returns({y}), {d})',
+}
 
 decay1op_map = {
+    'x': '({x})',
     'ts_mean': "ts_mean({x}, {d})",
     'ts_decay_linear': "ts_decay_linear({x}, {d})",
     'ts_decay_linear_av_diff': "ts_decay_linear(ts_av_diff({x}, {d})>0, {d})",
@@ -190,7 +207,7 @@ def merge_trees(treeA, treeB):
         treeA.x = merge_trees(treeA.x, treeB.x)
         treeA.d = merge_trees(treeA.d, treeB.d)
         treeA.g = merge_trees(treeA.g, treeB.g)
-        # treeA.y = merge_trees(treeA.y, treeB.y)
+        treeA.y = merge_trees(treeA.y, treeB.y)
     else:
         treeA = random.choice([treeA, treeB])
     return treeA
@@ -198,12 +215,12 @@ def merge_trees(treeA, treeB):
 class OP:
     def __init__(self, x_lst, y_lst, d_lst, g_lst, ops_map):
         self.x = None
-        # self.y = None
+        self.y = None
         self.d = None
         self.g = None
         self.op_type = None
         self.x_lst = x_lst
-        # self.y_lst = y_lst
+        self.y_lst = y_lst
         self.d_lst = d_lst
         self.g_lst = g_lst
         self.ops_map = ops_map
@@ -211,7 +228,7 @@ class OP:
     def __repr__(self):
         eval_string = ''
         x = self.x
-        # y = self.y
+        y = self.y
         d = self.d
         g = self.g
         if self.op_type:
@@ -222,8 +239,8 @@ class OP:
             self.op_type = random.choice(sorted(self.ops_map.keys()))
         if not self.x:
             self.x = random.choice(self.x_lst)
-        # if not self.y:
-        #     self.y = random.choice(self.y_lst)
+        if not self.y:
+            self.y = random.choice(self.y_lst)
         if not self.d:
             self.d = random.choice(self.d_lst)
         if not self.g:
@@ -233,8 +250,8 @@ class OP:
 
 def roulette_wheel(population):
     n = len(population)
-    shoot = random.randint(0, math.floor(n*n))
-    select = min(math.floor(math.pow(shoot,1/2)), n-1)
+    shoot = random.randint(0, math.floor(n*n*n))
+    select = min(math.floor(math.pow(shoot,1/3)), n-1)
     return population[select]
 
 def sigmoid(x):
@@ -349,17 +366,18 @@ def evolution(verbose=False):
             self_is_pnl['Return'] = self_is_pnl['Pnl'].diff() / 20000000
 
             self_is_pnl.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
-            annualized_sharpe_ratio = annualized_sharpe(self_is_pnl)
+            annualized_sharpe_ratio_lt = annualized_sharpe(self_is_pnl.iloc[:int(len(self_is_pnl)*0.8)]
+            annualized_sharpe_ratio_st = annualized_sharpe(self_is_pnl.iloc[int(len(self_is_pnl)*0.8):]
             max_drawdown = calculate_max_drawdown(self_is_pnl['Pnl']) / 20000000
             
             average_daily_turnover = self_is_tvr['Turnover'].mean()
             final_returns = self_is_pnl['Pnl'].iloc[-1] / 20000000
             alpha_stats = complete_alpha.response_data
-            if annualized_sharpe_ratio > 0 and average_daily_turnover > 0:
-                is_stats = {'sharpe': annualized_sharpe_ratio, 'turnover': average_daily_turnover, 'drawdown': max_drawdown, 'returns': final_returns} # alpha_stats['is']
+            if annualized_sharpe_ratio_lt > 0 and average_daily_turnover > 0:
+                is_stats = {'sharpe_lt': annualized_sharpe_ratio_lt, 'sharpe_st': annualized_sharpe_ratio_st, 'turnover': average_daily_turnover, 'drawdown': max_drawdown, 'returns': final_returns} # alpha_stats['is']
 
-                if is_stats['sharpe']:
-                    score = (objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['returns']), 0.5))# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+                if is_stats['sharpe_lt']:
+                    score = (objective_scoring(float(is_stats['sharpe_lt']), 1.8) + objective_scoring(float(is_stats['sharpe_st']), 2.4) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['returns']), 0.5))# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
                 else:
                     score = -9999
 
