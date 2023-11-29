@@ -14,10 +14,10 @@ from alpha_module import Alpha, AlphaStage
 API_BASE = "https://api.worldquantbrain.com"
 
 REGION = 'USA'
-UNIVERSE = 'TOP3000'
+UNIVERSE = 'ILLIQUID_MINVOL1M'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'SLOW'
+NEUTRALIZATION = 'SUBINDUSTRY'
 
 DATASET_ID = 'other84'
 
@@ -359,8 +359,8 @@ def evolution(verbose=False):
             tvr_df = pd.read_csv(complete_alpha.response_data['tvr_path'])
 
             # is_cutoff = '2019-01-01'
-            self_is_pnl, self_os_pnl = pnl_df.iloc[:int(len(pnl_df)*0.9),:], pnl_df.iloc[int(len(pnl_df)*0.9):,:] #pnl_df.loc[pnl_df.index < is_cutoff], pnl_df.loc[pnl_df.index >= is_cutoff]
-            self_is_tvr, self_os_tvr = tvr_df.iloc[:int(len(tvr_df)*0.9),:], tvr_df.iloc[int(len(tvr_df)*0.9):,:] #tvr_df.loc[tvr_df.index < is_cutoff], tvr_df.loc[tvr_df.index >= is_cutoff]
+            self_is_pnl, self_os_pnl = pnl_df.iloc[:int(len(pnl_df)*0.8),:], pnl_df.iloc[int(len(pnl_df)*0.8):,:] #pnl_df.loc[pnl_df.index < is_cutoff], pnl_df.loc[pnl_df.index >= is_cutoff]
+            self_is_tvr, self_os_tvr = tvr_df.iloc[:int(len(tvr_df)*0.8),:], tvr_df.iloc[int(len(tvr_df)*0.8):,:] #tvr_df.loc[tvr_df.index < is_cutoff], tvr_df.loc[tvr_df.index >= is_cutoff]
             
             
             self_is_pnl['Return'] = self_is_pnl['Pnl'].diff() / 20000000
