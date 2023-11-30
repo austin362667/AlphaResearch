@@ -14,10 +14,10 @@ from alpha_module import Alpha, AlphaStage
 API_BASE = "https://api.worldquantbrain.com"
 
 REGION = 'USA'
-UNIVERSE = 'ILLIQUID_MINVOL1M'
+UNIVERSE = 'TOP3000' # 'ILLIQUID_MINVOL1M'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'SUBINDUSTRY'
+NEUTRALIZATION = 'SUBINDUSTRY' 
 
 DATASET_ID = 'other84'
 
@@ -96,8 +96,8 @@ grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, univ
 # data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 
 
-x_lst = ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # vec_avg()
-y_lst = ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
+x_lst = ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # vec_avg()
+y_lst = ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [2,3,4,5,7,10,15,22,44,66,132,198,252]
 grp_lst =  [ f"densify(group_coalesce({g}, sector))" for g in grp_data_lst ] # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
