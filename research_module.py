@@ -15,7 +15,7 @@ API_BASE = "https://api.worldquantbrain.com"
 
 REGION = 'USA'
 UNIVERSE = 'TOP3000' # 'ILLIQUID_MINVOL1M'
-DECAY = 0
+DECAY = 4
 DELAY = 1
 NEUTRALIZATION = 'SUBINDUSTRY' 
 
