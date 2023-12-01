@@ -282,9 +282,9 @@ def crossover(parent_a, parent_b):
     merged_tree = merge_trees(parent_a, parent_b)
     return merged_tree
 
-def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
+def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map, day_lst=day_lst, grp_lst=grp_lst):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
     # return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=bin_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
-    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map) ]) ]) ])
+    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map, d_lst=day_lst, g_lst=grp_lst) ]) ]) ])
 
 def gen_population(size):
     population = []
