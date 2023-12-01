@@ -13,18 +13,18 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'EUR'
-UNIVERSE = 'TOP1200' # 'ILLIQUID_MINVOL1M'
+REGION = 'USA'
+UNIVERSE = 'ILLIQUID_MINVOL1M'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'COUNTRY' 
+NEUTRALIZATION = 'SUBINDUSTRY' 
 
-DATASET_ID = 'other176'
+DATASET_ID = 'other84'
 
-POPULATION_SIZE = 200
-GENERATION_EPOCH = 10
+POPULATION_SIZE = 100
+GENERATION_EPOCH = 15
 MUTATION_RATE = 0.2
-OS_RATIO = 0.95
+OS_RATIO = 0.8
 
 
 
@@ -94,16 +94,18 @@ worker_sess = start_session()
 # pv30 = get_datafields(worker_sess, dataset_id='pv30', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
 
-data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+#data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 
 
-x_lst = [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # vec_avg()
-y_lst = [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
+x_lst = ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
+y_lst = ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [2,3,4,5,7,10,15,22,44,66,132,198,252]
 grp_lst =  [ f"densify(group_coalesce({g}, sector))" for g in grp_data_lst ] # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
 
-ts1op_map = {
+
+ops_map = {
+# ts1op_map = {
     'x': '({x})',
     'ts_rank': 'ts_rank({x}, {d})',
     'ts_quantile_gaussian': 'ts_quantile({x}, {d}, driver="gaussian")',
@@ -139,9 +141,9 @@ ts1op_map = {
     'ts_regression_grp_mean': 'ts_regression({x}, group_mean({x}, 1, {g}), {d})',
     'ts_corr_step': 'ts_corr({x}, ts_step({d}), {d})',
     'ts_corr_delay': 'ts_corr({x}, ts_delay({x}, {d}), {d})',
-}
+# }
 
-grp1op_map = {
+# grp1op_map = {
     'x': '({x})',
     'grp_rank': 'group_rank({x}, {g})',
     'scale': 'scale({x}, scale=1, longscale=1, shortscale=1)',
@@ -152,11 +154,13 @@ grp1op_map = {
     'group_frac': '{x}/group_sum({x}, {g})',
     'grp_diff_median': '{x}-group_median({x}, {g})',
     'grp_diff_mean': '{x}-group_mean({x}, 1, {g})',
+    'grp_diff_mean_adv': '{x}-group_mean({x}, cap, {g})',
+    'grp_diff_mean_cap': '{x}-group_mean({x}, adv20, {g})',
     'grp_div_median': '{x}/group_median({x}, {g})',
     'grp_div_mean': '{x}/group_mean({x}, 1, {g})',
-}
+# }
 
-diff2op_map = {
+# diff2op_map = {
     'x': '({x})',
     'y': '({y})',
     'sub': 'subtract({x}, {y})',
@@ -164,13 +168,20 @@ diff2op_map = {
     'mas': 'ts_mean({x}, {d})-ts_mean({y}, {d})',
     'mad': 'ts_mean({x}, {d})/ts_mean({y}, {d})',
     'mts': 'ts_returns({x}, {d})-ts_returns({y}, {d})',
+    'vec_neut': 'vector_neut({x}, {y})',
+    'ts_reg': 'ts_regression({x}, {y}, {d})',
     'ts_reg_grp_med': 'ts_regression({x}, group_median({y}, {g}), {d})',
     'ts_reg_grp_mean': 'ts_regression({x}, group_mean({y}, 1, {g}), {d})',
-    'ts_reg': 'ts_regression({x}, {y}, {d})',
+    'ts_reg_grp_mean_cap': 'ts_regression({x}, group_mean({y}, cap, {g}), {d})',
     'ts_reg_ret': 'ts_regression(ts_returns({x}), ts_returns({y}), {d})',
-}
+    'ts_vec_neut': 'ts_vector_neut({x}, {y}, {d})',
+    'ts_vec_neut_grp_med': 'ts_vector_neut({x}, group_median({y}, {g}), {d})',
+    'ts_vec_neut_grp_mean': 'ts_vector_neut({x}, group_mean({y}, 1, {g}), {d})',
+    'ts_vec_neut_grp_mean_cap': 'ts_vector_neut({x}, group_mean({y}, cap, {g}), {d})',
+    'ts_vec_neut_ret': 'ts_vector_neut(ts_returns({x}), ts_returns({y}), {d})',
+# }
 
-decay1op_map = {
+# decay1op_map = {
     'x': '({x})',
     'ts_mean': "ts_mean({x}, {d})",
     'ts_decay_linear': "ts_decay_linear({x}, {d})",
@@ -271,8 +282,9 @@ def crossover(parent_a, parent_b):
     merged_tree = merge_trees(parent_a, parent_b)
     return merged_tree
 
-def gen_expression(x_lst=[], y_lst=[], ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
-    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=bin_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
+def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
+    # return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=bin_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
+    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map) ]) ]) ])
 
 def gen_population(size):
     population = []
