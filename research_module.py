@@ -13,17 +13,18 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'USA'
-UNIVERSE = 'TOP3000' # 'ILLIQUID_MINVOL1M'
-DECAY = 4
+REGION = 'EUR'
+UNIVERSE = 'TOP1200' # 'ILLIQUID_MINVOL1M'
+DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'SUBINDUSTRY' 
+NEUTRALIZATION = 'COUNTRY' 
 
-DATASET_ID = 'other84'
+DATASET_ID = 'other176'
 
-POPULATION_SIZE = 100
+POPULATION_SIZE = 200
 GENERATION_EPOCH = 10
 MUTATION_RATE = 0.2
+OS_RATIO = 0.95
 
 
 
@@ -96,8 +97,8 @@ grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, univ
 # data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 
 
-x_lst = ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # vec_avg()
-y_lst = ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
+x_lst = [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # vec_avg()
+y_lst = [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [2,3,4,5,7,10,15,22,44,66,132,198,252]
 grp_lst =  [ f"densify(group_coalesce({g}, sector))" for g in grp_data_lst ] # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
@@ -359,8 +360,8 @@ def evolution(verbose=False):
             tvr_df = pd.read_csv(complete_alpha.response_data['tvr_path'])
 
             # is_cutoff = '2019-01-01'
-            self_is_pnl, self_os_pnl = pnl_df.iloc[:int(len(pnl_df)*0.8),:], pnl_df.iloc[int(len(pnl_df)*0.8):,:] #pnl_df.loc[pnl_df.index < is_cutoff], pnl_df.loc[pnl_df.index >= is_cutoff]
-            self_is_tvr, self_os_tvr = tvr_df.iloc[:int(len(tvr_df)*0.8),:], tvr_df.iloc[int(len(tvr_df)*0.8):,:] #tvr_df.loc[tvr_df.index < is_cutoff], tvr_df.loc[tvr_df.index >= is_cutoff]
+            self_is_pnl, self_os_pnl = pnl_df.iloc[:int(len(pnl_df)*OS_RATIO),:], pnl_df.iloc[int(len(pnl_df)*OS_RATIO):,:] #pnl_df.loc[pnl_df.index < is_cutoff], pnl_df.loc[pnl_df.index >= is_cutoff]
+            self_is_tvr, self_os_tvr = tvr_df.iloc[:int(len(tvr_df)*OS_RATIO),:], tvr_df.iloc[int(len(tvr_df)*OS_RATIO):,:] #tvr_df.loc[tvr_df.index < is_cutoff], tvr_df.loc[tvr_df.index >= is_cutoff]
             
             
             self_is_pnl['Return'] = self_is_pnl['Pnl'].diff() / 20000000
