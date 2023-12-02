@@ -21,7 +21,7 @@ NEUTRALIZATION = 'SUBINDUSTRY'
 
 DATASET_ID = 'model138'
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 50
 GENERATION_EPOCH = 10
 MUTATION_RATE = 0.2
 OS_RATIO = 0.8
@@ -94,11 +94,11 @@ worker_sess = start_session()
 # pv30 = get_datafields(worker_sess, dataset_id='pv30', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
 
-data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='VECTOR')
+# data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='VECTOR')
 
 
-x_lst = [ f"ts_backfill(vec_avg({d}), 252)" for d in data_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
-y_lst = [ f"ts_backfill(vec_avg({d}), 252)" for d in data_lst ] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
+x_lst =  ['scale(ts_backfill(vec_avg(mdl138_3idpc), 252), scale=1, longscale=1, shortscale=1)', 'ts_backfill(vec_avg(mdl138_3idpqc), 252)-group_mean(ts_backfill(vec_avg(mdl138_3idpqc), 252), cap, densify(group_coalesce(sta1_top200c50, sector)))', 'ts_mean(ts_backfill(vec_avg(mdl138_3idpqc), 252), 44)-ts_mean(ts_backfill(vec_avg(mdl138_in_4idp), 252), 44)' ]# [ f"ts_backfill(vec_avg({d}), 252)" for d in data_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
+y_lst =  x_lst# [ f"ts_backfill(vec_avg({d}), 252)" for d in data_lst ] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [2,3,4,5,7,10,15,22,44,66,132,198,252]
 grp_lst =  [ f"densify(group_coalesce({g}, sector))" for g in grp_data_lst ] # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
@@ -284,8 +284,8 @@ def crossover(parent_a, parent_b):
 
 def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map, day_lst=day_lst, grp_lst=grp_lst):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
     # return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=bin_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
-    # return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
-    return OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
+    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
+    # return OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
 
 def gen_population(size):
     population = []
