@@ -13,16 +13,16 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'USA'
-UNIVERSE = 'TOP3000'
+REGION = 'GLB'
+UNIVERSE = 'MINVOL1M'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'INDUSTRY' 
+NEUTRALIZATION = 'COUNTRY' 
 
-DATASET_ID = 'analyst47'
+DATASET_ID = 'other460'
 
-POPULATION_SIZE = 50 
-GENERATION_EPOCH = 20
+POPULATION_SIZE = 5000
+GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
 
@@ -90,9 +90,9 @@ def get_datafields(
 
 worker_sess = start_session()
 
-# other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
-# pv30 = get_datafields(worker_sess, dataset_id='pv30', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
-grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
+other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+pv13 = get_datafields(worker_sess, dataset_id='pv13', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+grp_data_lst = [] # get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
 
 data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 
@@ -101,12 +101,13 @@ x_lst = [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vec_avg
 y_lst = [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [2,3,4,5,7,10,15,22,44,66,132,198,252]
-grp_lst =  [ f"densify(group_coalesce({g}, sector))" for g in grp_data_lst ] # ['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] + 
+grp_lst =  [ f"densify(group_coalesce({g}, sector))" for g in grp_data_lst+other455+pv13+['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] ] 
 
 
 ops_map = {
 # ts1op_map = {
     'x': '({x})',
+    'ts_delay': 'ts_delay({x}, {d})',
     'ts_rank': 'ts_rank({x}, {d})',
     'ts_quantile_gaussian': 'ts_quantile({x}, {d}, driver="gaussian")',
     'ts_quantile_uniform': 'ts_quantile({x}, {d}, driver="uniform")',
@@ -118,8 +119,10 @@ ops_map = {
     'ts_mean': 'ts_mean({x}, {d})',
     'ts_delta': 'ts_delta({x}, {d})',
     'ts_av_diff': 'ts_av_diff({x}, {d})',
+    'ts_ir': 'ts_ir({x}, {d})',
     'ts_zscore': 'ts_zscore({x}, {d})',
     'ts_returns': "ts_returns({x}, {d})",
+    'ts_std_dev': 'ts_std_dev({x}, {d})',
     'ts_skewness': 'ts_skewness({x}, {d})',
     'ts_kurtosis': 'ts_kurtosis({x}, {d})',
     'ts_max': "ts_max({x}, {d})",
@@ -179,6 +182,9 @@ ops_map = {
     'ts_vec_neut_grp_mean': 'ts_vector_neut({x}, group_mean({y}, 1, {g}), {d})',
     'ts_vec_neut_grp_mean_cap': 'ts_vector_neut({x}, group_mean({y}, cap, {g}), {d})',
     'ts_vec_neut_ret': 'ts_vector_neut(ts_returns({x}), ts_returns({y}), {d})',
+    'ts_co_kurtosis': 'ts_co_kurtosis({y}, {x}, {d})',
+    'ts_co_skewness': 'ts_co_skewness({y}, {x}, {d})',
+    'ts_covariance': 'ts_covariance({y}, {x}, {d})',
 # }
 
 # decay1op_map = {
@@ -284,7 +290,7 @@ def crossover(parent_a, parent_b):
 
 def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map, day_lst=day_lst, grp_lst=grp_lst):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
     # return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=bin_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
-    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
+    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
     # return OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
 
 def gen_population(size):
