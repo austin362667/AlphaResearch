@@ -19,11 +19,11 @@ DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'COUNTRY' 
 
-DATASET_ID = 'other460'
+DATASET_ID = 'pv_rev'
 
-POPULATION_SIZE = 100
+POPULATION_SIZE = 50
 GENERATION_EPOCH = 30
-MUTATION_RATE = 0.1
+MUTATION_RATE = 0.2
 OS_RATIO = 0.8
 
 
@@ -94,8 +94,8 @@ other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}'
 pv13 = get_datafields(worker_sess, dataset_id='pv13', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 grp_data_lst = [] # get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
 
-data_y_lst = [ "oth460_scstkc_class" ]
-data_x_lst = [ "oth460_clv_class"] # get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+data_x_lst = [ "vwap" ]
+data_y_lst = [ "close"] # get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 
 
 x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
@@ -106,8 +106,7 @@ grp_lst =  [ f"densify({g})" for g in grp_data_lst+other455+pv13+['subindustry',
 
 
 ops_map = {
-# ts1op_map = {
-    'x': '({x})',
+# ts1op_map = 
     'ts_delay': 'ts_delay({x}, {d})',
     'ts_rank': 'ts_rank({x}, {d})',
     'ts_quantile_gaussian': 'ts_quantile({x}, {d}, driver="gaussian")',
@@ -148,7 +147,6 @@ ops_map = {
 # }
 
 # grp1op_map = {
-    'x': '({x})',
     'grp_rank': 'group_rank({x}, {g})',
     'scale': 'scale({x}, scale=1, longscale=1, shortscale=1)',
     'grp_zscore': 'group_zscore({x}, {g})',
@@ -183,13 +181,21 @@ ops_map = {
     'ts_vec_neut_grp_mean': 'ts_vector_neut({x}, group_mean({y}, 1, {g}), {d})',
     'ts_vec_neut_grp_mean_cap': 'ts_vector_neut({x}, group_mean({y}, cap, {g}), {d})',
     'ts_vec_neut_ret': 'ts_vector_neut(ts_returns({x}), ts_returns({y}), {d})',
-    'ts_co_kurtosis': 'ts_co_kurtosis({y}, {x}, {d})',
-    'ts_co_skewness': 'ts_co_skewness({y}, {x}, {d})',
-    'ts_covariance': 'ts_covariance({y}, {x}, {d})',
+    'ts_co_kurtosis': 'ts_co_kurtosis({x}, {y}, {d})',
+    'ts_co_skewness': 'ts_co_skewness({x}, {y}, {d})',
+    'ts_covariance': 'ts_covariance({x}, {y}, {d})',
 # }
 
 # decay1op_map = {
-    'x': '({x})',
+    'regression_neut': 'regression_neut({x}, {y})',
+    'tanh': 'tanh({x})',
+    'sigmoid': 'sigmoid({x})',
+    'exp': 'exp({x})',
+    'log': 'log({x})',
+    'log_diff': 'log_diff({x})',
+    's_log_1p': 's_log_1p({x})',
+    'reverse': 'reverse({x})',
+    'inverse': 'inverse({x})',
     'ts_mean': "ts_mean({x}, {d})",
     'ts_decay_linear': "ts_decay_linear({x}, {d})",
     'ts_decay_linear_av_diff': "ts_decay_linear(ts_av_diff({x}, {d})>0, {d})",
@@ -269,8 +275,8 @@ class OP:
 
 def roulette_wheel(population):
     n = len(population)
-    shoot = random.randint(0, math.floor(n*n*n))
-    select = min(math.floor(math.pow(shoot,1/3)), n-1)
+    shoot = random.randint(0, math.floor(n*n))
+    select = min(math.floor(math.pow(shoot,1/2)), n-1)
     return population[select]
 
 def sigmoid(x):
@@ -291,7 +297,7 @@ def crossover(parent_a, parent_b):
 
 def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map, day_lst=day_lst, grp_lst=grp_lst):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
     # return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=bin_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
-    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
+    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
     # return OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
 
 def gen_population(size):
