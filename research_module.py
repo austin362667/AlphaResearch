@@ -24,7 +24,7 @@ DATASET_ID = 'pv_rev'
 POPULATION_SIZE = 50
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.2
-OS_RATIO = 0.9
+OS_RATIO = 0.8
 
 
 
@@ -275,8 +275,8 @@ class OP:
 
 def roulette_wheel(population):
     n = len(population)
-    shoot = random.randint(0, math.floor(n*n))
-    select = min(math.floor(math.pow(shoot,1/2)), n-1)
+    shoot = random.randint(0, math.floor(n*n*n*n*n))
+    select = min(math.floor(math.pow(shoot,1/5)), n-1)
     return population[select]
 
 def sigmoid(x):
@@ -297,7 +297,7 @@ def crossover(parent_a, parent_b):
 
 def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map, day_lst=day_lst, grp_lst=grp_lst):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
     # return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=bin_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
-    return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
+    return OP( x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
     # return OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
 
 def gen_population(size):
