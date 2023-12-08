@@ -19,11 +19,11 @@ DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'COUNTRY' 
 
-DATASET_ID = 'pv_rev'
+DATASET_ID = 'model50'
 
-POPULATION_SIZE = 50
+POPULATION_SIZE = 100
 GENERATION_EPOCH = 30
-MUTATION_RATE = 0.2
+MUTATION_RATE = 0.3
 OS_RATIO = 0.8
 
 
@@ -102,7 +102,7 @@ x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_a
 y_lst = [ f"ts_backfill(({d}), 252)" for d in data_y_lst ] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [2,3,4,5,7,10,15,22,44,66,132,198,252]
-grp_lst =  [ f"densify({g})" for g in grp_data_lst+other455+pv13+['subindustry', 'industry', 'sector', 'market', 'exchange', 'country'] ] 
+grp_lst =  [ f"densify({g})" for g in grp_data_lst+other455+pv13+['subindustry', 'industry', 'sector', 'exchange', 'country', 'market']] 
 
 
 ops_map = {
@@ -290,9 +290,83 @@ def objective_scoring(raw_val, baseline, reverse = False):
     else:
         val = raw_val/baseline - 1
         return (sigmoid(val)-0.5) if val >= 0 else (sigmoid(val)-0.5)*3
+
+
+class OpTree:
+    def __init__(self, depth, x_lst, y_lst, d_lst, g_lst, ops_map):
+        self.depth = depth
+        self.root = self.generate_tree(depth, x_lst, y_lst, d_lst, g_lst, ops_map)
+
+    def __repr__(self):
+        return self._repr_recursive(self.root)
+
+    def _repr_recursive(self, node):
+        if not node:
+            return ""
+
+        repr_string = repr(node)
+        # if isinstance(node, OP) and node.x:
+        #     repr_string += str(node)# f"{self._repr_recursive(node.x)}"
+
+        return repr_string
     
-def crossover(parent_a, parent_b):
-    merged_tree = merge_trees(parent_a, parent_b)
+    def generate_tree(self, depth, x_lst, y_lst, d_lst, g_lst, ops_map):
+        if depth == 0:
+            return OP(x_lst, y_lst, d_lst, g_lst, ops_map)
+
+        op_node = OP(x_lst, y_lst, d_lst, g_lst, ops_map)
+        op_node.x = self.generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
+
+        return op_node
+    
+
+    def get_nth_op_parent(self, n, current_node=None, parent=None, counter=None):
+        if counter is None:
+            # Initialize a counter for tracking the number of encountered OPs
+            counter = [0]
+
+        if current_node is None:
+            current_node = self.root
+
+        if not current_node:
+            return None, None
+
+        if isinstance(current_node, OP):
+            # Increment the counter when an OP is encountered
+            counter[0] += 1
+
+            # Return the parent and the OP if it's the N-th one
+            if counter[0] == n:
+                return parent, current_node
+
+        # Continue traversing the tree
+        return self.get_nth_op_parent(n, current_node.x, current_node, counter)
+
+    def modify_nth_op(self, n, new_op):
+        parent, nth_op = self.get_nth_op_parent(n)
+
+        if parent and nth_op:
+            # Replace the N-th OP with the new OP
+            parent.x = new_op
+        else:
+            print(f"There is no N-th OP in the tree.")
+            
+
+    # def get_nth_op(self, n):
+    #     counter = [0]
+    #     def traverse(node):
+    #         if not node:
+    #             return None
+    #         if isinstance(node, OP):
+    #             counter[0] += 1
+    #             if counter[0] == n:
+    #                 return node
+    #         return traverse(node.x)
+    #     return traverse(self.root)
+
+    
+def crossover(parent_a:OpTree, parent_b:OpTree):
+    merged_tree:OpTree = merge_trees(parent_a, parent_b)
     return merged_tree
 
 def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map, day_lst=day_lst, grp_lst=grp_lst):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
@@ -304,7 +378,7 @@ def gen_population(size):
     population = []
     while len(population)<size:
         for i in range(size):
-            exp = gen_expression()
+            exp = OpTree(3, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
             population.append(exp)
         population = list(set(population))
     return population
@@ -358,6 +432,8 @@ def calculate_max_drawdown(cumulative_pnl):
 
     return max_drawdown
 
+
+
 def evolution(verbose=False):
     
     parent_population = gen_population(POPULATION_SIZE)
@@ -403,7 +479,7 @@ def evolution(verbose=False):
             if annualized_sharpe_ratio_lt > 0 and average_daily_turnover > 0:
                 is_stats = {'sharpe_lt': annualized_sharpe_ratio_lt, 'sharpe_st': annualized_sharpe_ratio_st, 'turnover': average_daily_turnover, 'drawdown': max_drawdown, 'returns': final_returns} # alpha_stats['is']
 
-                if is_stats['sharpe_lt']:
+                if is_stats['sharpe_lt'] and is_stats['sharpe_st']:
                     score = (objective_scoring(float(is_stats['sharpe_lt']), 1.8) + objective_scoring(float(is_stats['sharpe_st']), 2.4) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['returns']), 0.5))# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
                 else:
                     score = -9999
@@ -425,7 +501,8 @@ def evolution(verbose=False):
             parent_a , parent_b = roulette_wheel([x['data'] for x in alpha_rank_batch]), roulette_wheel([x['data'] for x in alpha_rank_batch])
             child = crossover(parent_a, parent_b)
             if random.random() < MUTATION_RATE:
-                child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
+                child.modify_nth_op(child.depth, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
+                # child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
             children_population.append(child)
         
         parent_population = children_population
