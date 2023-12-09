@@ -94,8 +94,8 @@ other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}'
 pv13 = get_datafields(worker_sess, dataset_id='pv13', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 grp_data_lst = [] # get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
 
-data_x_lst = [ "vwap" ]
-data_y_lst = [ "close"] # get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+data_x_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+data_y_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 
 
 x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
