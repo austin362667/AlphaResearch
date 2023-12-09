@@ -19,7 +19,7 @@ DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'COUNTRY' 
 
-DATASET_ID = 'model50'
+DATASET_ID = 'analyst15'
 
 POPULATION_SIZE = 100
 GENERATION_EPOCH = 30
@@ -89,19 +89,37 @@ def get_datafields(
         return datafields_df['id'].tolist()
 
 worker_sess = start_session()
+other455 = []
+try:
+    other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+except:
+    other455 = []
 
-other455 = get_datafields(worker_sess, dataset_id='other455', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
-pv13 = get_datafields(worker_sess, dataset_id='pv13', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
-grp_data_lst = [] # get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
+pv13 = []
+try:
+    pv13 = get_datafields(worker_sess, dataset_id='pv13', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+except:
+    pv13 = []
+    
+grp_data_lst = [] 
+try:
+    grp_data_lst = get_datafields(worker_sess, region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='GROUP')
+except:
+    grp_data_lst = []
 
-data_x_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
-data_y_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+data_lst = []
+try:
+    data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+except:
+    data_lst = []
+data_x_lst = data_lst
+data_y_lst = data_lst
 
 
 x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
 y_lst = [ f"ts_backfill(({d}), 252)" for d in data_y_lst ] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
-day_lst = [2,3,4,5,7,10,15,22,44,66,132,198,252]
+day_lst = [3,4,5,7,10,15,22,44,66,132,198,252]
 grp_lst =  [ f"densify({g})" for g in grp_data_lst+other455+pv13+['subindustry', 'industry', 'sector', 'exchange', 'country', 'market']] 
 
 
@@ -378,7 +396,7 @@ def gen_population(size):
     population = []
     while len(population)<size:
         for i in range(size):
-            exp = OpTree(3, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
+            exp = OpTree(6, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
             population.append(exp)
         population = list(set(population))
     return population
@@ -418,10 +436,11 @@ def generate_alpha(
     return simulation_data
 
 def annualized_sharpe(pnl_df):
-    trading_days_per_year = 252
-    annualized_sharpe_ratio = (pnl_df['Return'].groupby(pnl_df.index // trading_days_per_year).mean().divide(pnl_df['Return'].groupby(pnl_df.index // trading_days_per_year).std())).mean() * math.sqrt(trading_days_per_year)
+    # trading_days_per_year = 252
+    # annualized_sharpe_ratio = (pnl_df['Return'].groupby(pnl_df.index // trading_days_per_year).mean().divide(pnl_df['Return'].groupby(pnl_df.index // trading_days_per_year).std())).mean() * math.sqrt(trading_days_per_year)
+    annualized_sharpe_lst = (pnl_df["Return"].resample("Y").mean() / pnl_df['Return'].resample("Y").std()) * math.sqrt(252)
 
-    return annualized_sharpe_ratio
+    return annualized_sharpe_lst
 
 def calculate_max_drawdown(cumulative_pnl):
     cumulative_max = cumulative_pnl.cummax()
@@ -435,8 +454,8 @@ def calculate_max_drawdown(cumulative_pnl):
 
 
 def evolution(verbose=False):
-    
-    parent_population = gen_population(POPULATION_SIZE)
+    batch_size = POPULATION_SIZE
+    parent_population = gen_population(batch_size)
     research_id_prefix = f'{REGION}_{UNIVERSE}_{DELAY}_{DATASET_ID}_{NEUTRALIZATION}'
     for e in range(GENERATION_EPOCH):
         alpha_batch = []
@@ -459,49 +478,58 @@ def evolution(verbose=False):
             complete_alpha: Alpha = Alpha.load_from_disk(file_path=complete_file)
 
             pnl_df = pd.read_csv(complete_alpha.response_data['pnl_path'])
+            pnl_df.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
+            pnl_df['Date'] = pd.to_datetime(pnl_df['Date'])
+            pnl_df = pnl_df.set_index("Date")
+            pnl_df = pd.DataFrame(pnl_df,columns=["Pnl"])
+            pnl_df['Return'] = (pnl_df['Pnl'].copy().diff() / 10000000)
+
             tvr_df = pd.read_csv(complete_alpha.response_data['tvr_path'])
+            tvr_df.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
+            tvr_df['Date'] = pd.to_datetime(tvr_df['Date'])
+            tvr_df = tvr_df.set_index("Date")
+            tvr_df = pd.DataFrame(tvr_df,columns=["Turnover"])
 
-            # is_cutoff = '2019-01-01'
-            self_is_pnl, self_os_pnl = pnl_df.iloc[:int(len(pnl_df)*OS_RATIO),:], pnl_df.iloc[int(len(pnl_df)*OS_RATIO):,:] #pnl_df.loc[pnl_df.index < is_cutoff], pnl_df.loc[pnl_df.index >= is_cutoff]
-            self_is_tvr, self_os_tvr = tvr_df.iloc[:int(len(tvr_df)*OS_RATIO),:], tvr_df.iloc[int(len(tvr_df)*OS_RATIO):,:] #tvr_df.loc[tvr_df.index < is_cutoff], tvr_df.loc[tvr_df.index >= is_cutoff]
-            
-            
-            self_is_pnl['Return'] = self_is_pnl['Pnl'].diff() / 20000000
+            pnl_df['Last'] = pnl_df['Pnl'].resample("Y").last()
+            pnl_df['Peak'] = pnl_df['Pnl'].cummax()
+            pnl_df['Drawdown'] = -1*(pnl_df['Peak'] - pnl_df['Pnl']) / pnl_df['Peak']
+            maxdrawdown_year = [ -1*dd for dd in (pnl_df['Drawdown'].resample("Y").max()).values.tolist()]
+            turnover_year = (tvr_df['Turnover'].resample("Y").mean()).values.tolist()
+            returns_year = np.multiply((pnl_df['Return'].resample("Y").sum()).values.tolist(), (252/pnl_df['Pnl'].resample("Y").count()).values.tolist())
+            sharpe_year = ((pnl_df['Return'].resample("Y").mean() /  (pnl_df['Return'].resample("Y")).std())*math.sqrt(252)).values.tolist()
+            margin_year = ((pnl_df['Pnl'].copy().diff() / (tvr_df['Turnover'] * (2*10000000))).resample("Y").mean()*10000).values.tolist()
+            fitness_year = sharpe_year * np.sqrt(np.divide([ abs(ret) for ret in returns_year ], [ max(tvr, 0.125) for tvr in turnover_year])) 
 
-            self_is_pnl.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
-            annualized_sharpe_ratio_lt = annualized_sharpe(self_is_pnl.iloc[:int(len(self_is_pnl)*0.8),:])
-            annualized_sharpe_ratio_st = annualized_sharpe(self_is_pnl.iloc[int(len(self_is_pnl)*0.8):,:])
-            max_drawdown = calculate_max_drawdown(self_is_pnl['Pnl']) / 20000000
-            
-            average_daily_turnover = self_is_tvr['Turnover'].mean()
-            final_returns = self_is_pnl['Pnl'].iloc[-1] / 20000000
+
             alpha_stats = complete_alpha.response_data
-            if annualized_sharpe_ratio_lt > 0 and average_daily_turnover > 0:
-                is_stats = {'sharpe_lt': annualized_sharpe_ratio_lt, 'sharpe_st': annualized_sharpe_ratio_st, 'turnover': average_daily_turnover, 'drawdown': max_drawdown, 'returns': final_returns} # alpha_stats['is']
+            if np.mean(turnover_year) > 0:
+                is_stats = {'sharpe': np.mean(sharpe_year), 'sharpe_lt':  np.mean(sharpe_year[:6]), 'sharpe_st':  np.mean(sharpe_year[6:8]), 'fitness': np.mean(fitness_year[:8]), 'turnover': np.mean(turnover_year[:8]), 'margin': np.mean(margin_year[:8]), 'drawdown': np.mean(maxdrawdown_year[:8]), 'returns': np.mean(returns_year[:8])} # alpha_stats['is']
 
-                if is_stats['sharpe_lt'] and is_stats['sharpe_st']:
-                    score = (objective_scoring(float(is_stats['sharpe_lt']), 1.8) + objective_scoring(float(is_stats['sharpe_st']), 2.4) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['returns']), 0.5))# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+                if is_stats['sharpe']:
+                    score = (objective_scoring(float(is_stats['sharpe_lt']), 2) + objective_scoring(float(is_stats['sharpe_st']), 3.5) + objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['margin']), 20) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.01, True) + objective_scoring(float(is_stats['returns']), 0.2))/7# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
                 else:
                     score = -9999
 
                 for a_i in parent_population:
                     if str(a_i) == alpha_stats['regular']['code'] and score != -9999:
-                        alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'sharpe':is_stats['sharpe_st'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
+                        alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'sharpe':is_stats['sharpe'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
                         break
 
         alpha_rank_batch = sorted(alpha_batch, key=lambda x: x['score'], reverse=False)
         
         for v in alpha_rank_batch:
             # print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{v['fitness']}\t{v['sharpe']}\t{round(v['turnover']*100,2)}\t{round(v['returns']*100,2)}\t{round(v['drawdown']*100,2)}\t{round(v['margin']*10000,2)}") #\t{v['corr']>0.995}")
-            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{round(v['sharpe'], 2)}\t{round(v['turnover']*100,2)}\t{round(v['drawdown']*100,2)}\t{round((v['returns']/9)*100,2)}") #\t{v['corr']>0.995}")
+            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{round(v['sharpe'], 2)}\t{round(v['turnover']*100,2)}\t{round((v['returns'])*100,2)}\t{round(v['drawdown']*100,2)}") #\t{v['corr']>0.995}")
 
         children_population = []
-        # POPULATION_SIZE -= 30
-        while len(children_population) < POPULATION_SIZE:
+        batch_size /= 1.2
+        batch_size = int(batch_size)
+        while len(children_population) < batch_size:
             parent_a , parent_b = roulette_wheel([x['data'] for x in alpha_rank_batch]), roulette_wheel([x['data'] for x in alpha_rank_batch])
             child = crossover(parent_a, parent_b)
             if random.random() < MUTATION_RATE:
-                child.modify_nth_op(child.depth, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
+                rn = random.randint(int(child.depth/2), child.depth-1)
+                child.modify_nth_op(rn, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
                 # child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
             children_population.append(child)
         
