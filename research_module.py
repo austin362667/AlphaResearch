@@ -6,6 +6,7 @@ import requests
 import numpy as np
 import pandas as pd
 from copy import deepcopy
+import numbers
 
 from alpha_module import Alpha, AlphaStage
 
@@ -499,21 +500,26 @@ def evolution(verbose=False):
             sharpe_year = ((pnl_df['Return'].resample("Y").mean() /  (pnl_df['Return'].resample("Y")).std())*math.sqrt(252)).values.tolist()
             margin_year = ((pnl_df['Pnl'].copy().diff() / (tvr_df['Turnover'] * (2*10000000))).resample("Y").mean()*10000).values.tolist()
             fitness_year = sharpe_year * np.sqrt(np.divide([ abs(ret) for ret in returns_year ], [ max(tvr, 0.125) for tvr in turnover_year])) 
+            
+            def is_valid_number(value):
+                if isinstance(value, numbers.Number) and not isinstance(value, complex):
+                    if value not in {float('inf'), float('-inf'), float('nan'), None}:
+                        return True
 
+                return False
 
             alpha_stats = complete_alpha.response_data
-            if np.mean(turnover_year) > 0:
+            if is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
                 is_stats = {'sharpe': np.mean(sharpe_year), 'sharpe_lt':  np.mean(sharpe_year[:6]), 'sharpe_st':  np.mean(sharpe_year[6:8]), 'fitness': np.mean(fitness_year[:8]), 'turnover': np.mean(turnover_year[:8]), 'margin': np.mean(margin_year[:8]), 'drawdown': np.mean(maxdrawdown_year[:8]), 'returns': np.mean(returns_year[:8])} # alpha_stats['is']
-
-                if is_stats['sharpe']:
+                if float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
                     score = (objective_scoring(float(is_stats['sharpe_lt']), 2) + objective_scoring(float(is_stats['sharpe_st']), 3.5) + objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['margin']), 20) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True) + objective_scoring(float(is_stats['drawdown']), 0.01, True) + objective_scoring(float(is_stats['returns']), 0.2))/7# (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
-                else:
-                    score = -9999
 
-                for a_i in parent_population:
-                    if str(a_i) == alpha_stats['regular']['code'] and score and score != -9999:
-                        alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'sharpe':is_stats['sharpe'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
-                        break
+                    if is_valid_number(score):
+
+                        for a_i in parent_population:
+                            if str(a_i) == alpha_stats['regular']['code']:
+                                alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'sharpe':is_stats['sharpe'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
+                                break
 
         alpha_rank_batch = sorted(alpha_batch, key=lambda x: x['score'], reverse=False)
         
