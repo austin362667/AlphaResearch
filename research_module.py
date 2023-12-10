@@ -528,8 +528,8 @@ def evolution(verbose=False):
             parent_a , parent_b = roulette_wheel([x['data'] for x in alpha_rank_batch]), roulette_wheel([x['data'] for x in alpha_rank_batch])
             child = crossover(parent_a, parent_b)
             if random.random() < MUTATION_RATE:
-                rn = random.randint(int(child.depth/2), child.depth-1)
-                child.modify_nth_op(rn, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
+                # rn = random.randint(int(child.depth/2), child.depth)
+                child.modify_nth_op(child.depth, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
                 # child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
             children_population.append(child)
         
