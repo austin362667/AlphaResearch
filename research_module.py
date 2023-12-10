@@ -397,7 +397,7 @@ def gen_population(size):
     population = []
     while len(population)<size:
         for i in range(size):
-            exp = OpTree(6, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
+            exp = OpTree(4, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
             population.append(exp)
         population = list(set(population))
     return population
