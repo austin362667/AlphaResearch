@@ -511,7 +511,7 @@ def evolution(verbose=False):
                     score = -9999
 
                 for a_i in parent_population:
-                    if str(a_i) == alpha_stats['regular']['code'] and score != -9999:
+                    if str(a_i) == alpha_stats['regular']['code'] and score and score != -9999:
                         alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'sharpe':is_stats['sharpe'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
                         break
 
