@@ -113,8 +113,8 @@ try:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 except:
     data_lst = []
-data_x_lst = ['vwap', 'close'] # data_lst
-data_y_lst = ['vwap', 'close'] # ['cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
+data_x_lst = ['vwap'] # data_lst
+data_y_lst = ['close'] # ['cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
 x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
@@ -179,34 +179,7 @@ ops_map = {
     'grp_diff_mean_cap': '{x}-group_mean({x}, adv20, {g})',
     'grp_div_median': '{x}/group_median({x}, {g})',
     'grp_div_mean': '{x}/group_mean({x}, 1, {g})',
-# }
-
-# diff2op_map = {
     'x': '({x})',
-    'y': '({y})',
-    'sub': 'subtract({x}, {y})',
-    'div': 'divide({x}, {y})',
-    'mas': 'ts_mean({x}, {d})-ts_mean({y}, {d})',
-    'mad': 'ts_mean({x}, {d})/ts_mean({y}, {d})',
-    'mts': 'ts_returns({x}, {d})-ts_returns({y}, {d})',
-    'vec_neut': 'vector_neut({x}, {y})',
-    'ts_reg': 'ts_regression({x}, {y}, {d})',
-    'ts_reg_grp_med': 'ts_regression({x}, group_median({y}, {g}), {d})',
-    'ts_reg_grp_mean': 'ts_regression({x}, group_mean({y}, 1, {g}), {d})',
-    'ts_reg_grp_mean_cap': 'ts_regression({x}, group_mean({y}, cap, {g}), {d})',
-    'ts_reg_ret': 'ts_regression(ts_returns({x}), ts_returns({y}), {d})',
-    'ts_vec_neut': 'ts_vector_neut({x}, {y}, {d})',
-    'ts_vec_neut_grp_med': 'ts_vector_neut({x}, group_median({y}, {g}), {d})',
-    'ts_vec_neut_grp_mean': 'ts_vector_neut({x}, group_mean({y}, 1, {g}), {d})',
-    'ts_vec_neut_grp_mean_cap': 'ts_vector_neut({x}, group_mean({y}, cap, {g}), {d})',
-    'ts_vec_neut_ret': 'ts_vector_neut(ts_returns({x}), ts_returns({y}), {d})',
-    'ts_co_kurtosis': 'ts_co_kurtosis({x}, {y}, {d})',
-    'ts_co_skewness': 'ts_co_skewness({x}, {y}, {d})',
-    'ts_covariance': 'ts_covariance({x}, {y}, {d})',
-# }
-
-# decay1op_map = {
-    'regression_neut': 'regression_neut({x}, {y})',
     'tanh': 'tanh({x})',
     'sigmoid': 'sigmoid({x})',
     'exp': 'exp({x})',
@@ -231,6 +204,37 @@ ops_map = {
     'winsorize_3': "winsorize({x}, std = 5)",
     'winsorize_4': "winsorize({x}, std = 10)",
 }
+
+diff2op_map = {
+
+    'sub': 'subtract({x}, {y})',
+    'div': 'divide({x}, {y})',
+    'mas': 'ts_mean({x}, {d})-ts_mean({y}, {d})',
+    'mad': 'ts_mean({x}, {d})/ts_mean({y}, {d})',
+    'mts': 'ts_returns({x}, {d})-ts_returns({y}, {d})',
+    'vec_neut': 'vector_neut({x}, {y})',
+    'ts_reg': 'ts_regression({x}, {y}, {d})',
+    'ts_reg_grp_med': 'ts_regression({x}, group_median({y}, {g}), {d})',
+    'ts_reg_grp_mean': 'ts_regression({x}, group_mean({y}, 1, {g}), {d})',
+    'ts_reg_grp_mean_cap': 'ts_regression({x}, group_mean({y}, cap, {g}), {d})',
+    'ts_reg_ret': 'ts_regression(ts_returns({x}), ts_returns({y}), {d})',
+    'ts_vec_neut': 'ts_vector_neut({x}, {y}, {d})',
+    'ts_vec_neut_grp_med': 'ts_vector_neut({x}, group_median({y}, {g}), {d})',
+    'ts_vec_neut_grp_mean': 'ts_vector_neut({x}, group_mean({y}, 1, {g}), {d})',
+    'ts_vec_neut_grp_mean_cap': 'ts_vector_neut({x}, group_mean({y}, cap, {g}), {d})',
+    'ts_vec_neut_ret': 'ts_vector_neut(ts_returns({x}), ts_returns({y}), {d})',
+    'ts_co_kurtosis': 'ts_co_kurtosis({x}, {y}, {d})',
+    'ts_co_skewness': 'ts_co_skewness({x}, {y}, {d})',
+    'ts_covariance': 'ts_covariance({x}, {y}, {d})',
+    'regression_neut': 'regression_neut({x}, {y})',
+}
+
+ops_y_map = ops_map.replace('{x}', '{y}')
+ops_map.update(ops_y_map)
+ops_map.update(diff2op_map)
+# decay1op_map = {
+
+# }
 
 def passbyval(func):
     def new(*args):
