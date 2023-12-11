@@ -113,7 +113,7 @@ try:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 except:
     data_lst = []
-data_x_lst = ['vwap/close'] data_lst
+data_x_lst = ['vwap/close'] # data_lst
 data_y_lst = ['cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
@@ -397,7 +397,7 @@ def gen_population(size):
     population = []
     while len(population)<size:
         for i in range(size):
-            exp = OpTree(4, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
+            exp = OpTree(3, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
             population.append(exp)
         population = list(set(population))
     return population
