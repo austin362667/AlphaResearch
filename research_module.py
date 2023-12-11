@@ -518,7 +518,7 @@ def evolution(verbose=False):
 
                         for a_i in parent_population:
                             if str(a_i) == alpha_stats['regular']['code']:
-                                alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'sharpe':is_stats['sharpe'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
+                                alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'fitness':is_stats['fitness'], 'sharpe':is_stats['sharpe'], 'margin': is_stats['margin'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
                                 break
 
         alpha_rank_batch = sorted(alpha_batch, key=lambda x: x['score'], reverse=False)
@@ -528,7 +528,7 @@ def evolution(verbose=False):
             print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\tFitness: {round(v['fitness'], 2)}\tSharpe: {round(v['sharpe'], 2)}\tTurnover: {round(v['turnover']*100,2)}\tReturns: {round((v['returns'])*100,2)}\tDrawdown: {round(v['drawdown']*100,2)}\tMargin: {round(v['margin'],2)}") #\t{v['corr']>0.995}")
 
         children_population = []
-        batch_size /= 1.2
+        batch_size /= 1.1
         batch_size = int(batch_size)
         while len(children_population) < batch_size:
             parent_a , parent_b = roulette_wheel([x['data'] for x in alpha_rank_batch]), roulette_wheel([x['data'] for x in alpha_rank_batch])
