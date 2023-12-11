@@ -22,8 +22,8 @@ NEUTRALIZATION = 'COUNTRY'
 
 DATASET_ID = 'pv104'
 
-POPULATION_SIZE = 50
-GENERATION_EPOCH = 20
+POPULATION_SIZE = 100
+GENERATION_EPOCH = 25
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
 
@@ -510,10 +510,10 @@ def evolution(verbose=False):
                 return False
 
             alpha_stats = complete_alpha.response_data
-            if is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
-                is_stats = {'sharpe': np.mean(sharpe_year[1:8]), 'sharpe_lt':  np.mean(sharpe_year[1:6]), 'sharpe_st':  np.mean(sharpe_year[6:8]), 'fitness': np.mean(fitness_year[1:8]), 'turnover': np.mean(turnover_year[1:8]), 'margin': np.mean(margin_year[1:8]), 'drawdown': np.mean(maxdrawdown_year[1:8]), 'returns': np.mean(returns_year[1:8])} # alpha_stats['is']
-                if float(is_stats['turnover'])>0 and float(is_stats['returns'])>0: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
-                    score = (objective_scoring(float(is_stats['sharpe_lt']), 1.8) + objective_scoring(float(is_stats['sharpe_st']), 2.3) + objective_scoring(float(is_stats['fitness']), 1.3) + objective_scoring(max(float(is_stats['turnover']), 0.06), 0.2, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+            if True: #is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
+                is_stats = {'sharpe': np.mean(sharpe_year[1:8]), 'sharpe_lt':  np.mean(sharpe_year[1:8]), 'sharpe_st':  np.mean(sharpe_year[6:8]), 'fitness': np.mean(fitness_year[1:8]), 'turnover': np.mean(turnover_year[1:8]), 'margin': np.mean(margin_year[1:8]), 'drawdown': np.mean(maxdrawdown_year[1:8]), 'returns': np.mean(returns_year[1:8])} # alpha_stats['is']
+                if float(is_stats['turnover'])>0.01 and float(is_stats['returns'])>-0.1 and float(is_stats['sharpe'])>-1 and float(is_stats['fitness'])>-0.5: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
+                    score = (objective_scoring(float(is_stats['sharpe_lt']), 2) + objective_scoring(float(is_stats['sharpe_st']), 2.8) + objective_scoring(float(is_stats['fitness']), 1.6) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
 
                     if score:
 
@@ -526,10 +526,10 @@ def evolution(verbose=False):
         
         for v in alpha_rank_batch:
             # print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{v['fitness']}\t{v['sharpe']}\t{round(v['turnover']*100,2)}\t{round(v['returns']*100,2)}\t{round(v['drawdown']*100,2)}\t{round(v['margin']*10000,2)}") #\t{v['corr']>0.995}")
-            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} : Fitness: {round(v['fitness'], 2)} Sharpe: {round(v['sharpe'], 2)} Turnover: {round(v['turnover']*100,2)} Returns: {round((v['returns'])*100,2)} Margin: {round(v['score'],2)}") #\t{v['corr']>0.995}")
+            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} : Fitness: {round(v['fitness'], 2)} Sharpe: {round(v['sharpe'], 2)} Turnover: {round(v['turnover']*100,2)} Returns: {round((v['returns'])*100,2)} Score: {round(v['score'],2)}") #\t{v['corr']>0.995}")
 
         children_population = []
-        batch_size /= 1.1
+        batch_size /= 1.05
         batch_size = int(batch_size)
         while len(children_population) < batch_size:
             parent_a , parent_b = roulette_wheel([x['data'] for x in alpha_rank_batch]), roulette_wheel([x['data'] for x in alpha_rank_batch])
