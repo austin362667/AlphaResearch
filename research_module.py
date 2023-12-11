@@ -113,8 +113,8 @@ try:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 except:
     data_lst = []
-data_x_lst = ['vwap'] # data_lst
-data_y_lst = ['close'] # ['cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
+data_x_lst = ['vwap', 'close'] # data_lst
+data_y_lst = ['vwap', 'close'] # ['cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
 x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
@@ -335,7 +335,7 @@ class OpTree:
 
         op_node = OP(x_lst, y_lst, d_lst, g_lst, ops_map)
         op_node.x = self.generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
-
+        op_node.y = self.generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
         return op_node
     
 
@@ -361,12 +361,13 @@ class OpTree:
         # Continue traversing the tree
         return self.get_nth_op_parent(n, current_node.x, current_node, counter)
 
-    def modify_nth_op(self, n, new_op):
+    def modify_nth_op(self, n, new_op1, new_op2):
         parent, nth_op = self.get_nth_op_parent(n)
 
         if parent and nth_op:
             # Replace the N-th OP with the new OP
-            parent.x = new_op
+            parent.x = new_op1
+            parent.y = new_op2
         else:
             print(f"There is no N-th OP in the tree.")
             
@@ -397,7 +398,7 @@ def gen_population(size):
     population = []
     while len(population)<size:
         for i in range(size):
-            exp = OpTree(2, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
+            exp = OpTree(3, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
             population.append(exp)
         population = list(set(population))
     return population
@@ -528,14 +529,14 @@ def evolution(verbose=False):
             print(f"https://platform.worldquantbrain.com/alpha/{v['id']} : Fitness: {round(v['fitness'], 2)} Sharpe: {round(v['sharpe'], 2)} Turnover: {round(v['turnover']*100,2)} Returns: {round((v['returns'])*100,2)} Margin: {round(v['score'],2)}") #\t{v['corr']>0.995}")
 
         children_population = []
-        batch_size /= 1.05
+        batch_size /= 1.1
         batch_size = int(batch_size)
         while len(children_population) < batch_size:
             parent_a , parent_b = roulette_wheel([x['data'] for x in alpha_rank_batch]), roulette_wheel([x['data'] for x in alpha_rank_batch])
             child = crossover(parent_a, parent_b)
             if random.random() < MUTATION_RATE:
                 # rn = random.randint(int(child.depth/2), child.depth)
-                child.modify_nth_op(child.depth, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
+                child.modify_nth_op(child.depth, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map), OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
                 # child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
             children_population.append(child)
         
