@@ -232,7 +232,7 @@ ops_map = {}
 for k, v in ops_x_map.items():
     ops_y_map[f"{k}_y"] = v.replace('{x}', '{y}')
 ops_map.update(ops_x_map)
-ops_map.update(ops_y_map))
+ops_map.update(ops_y_map)
 ops_map.update(diff2op_map)
 
 # decay1op_map = {
