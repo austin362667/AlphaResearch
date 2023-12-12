@@ -228,10 +228,11 @@ diff2op_map = {
     'ts_covariance': 'ts_covariance({x}, {y}, {d})',
     'regression_neut': 'regression_neut({x}, {y})',
 }
-
+ops_y_map = ops_map
 for k, v in ops_map.items():
-    ops_map[f"{k}_y"] = v.replace('{x}', '{y}')
-ops_map.update(diff2op_map)
+    ops_y_map[f"{k}_y"] = v.replace('{x}', '{y}')
+ops_y_map.update(diff2op_map)
+ops_map = ops_y_map
 # decay1op_map = {
 
 # }
