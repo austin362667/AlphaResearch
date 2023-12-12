@@ -310,13 +310,27 @@ def sigmoid(x):
     epsilon = 1e-15
     return 1 / (1+np.exp(-x+epsilon))
 
-def objective_scoring(raw_val, baseline, reverse = False):
+def objective_scoring(raw_val, upper, lower, reverse = False):
     if reverse:
-        val = 1 - raw_val/baseline
-        return (sigmoid(val-2)-0.5) if val >= 0 else (sigmoid(val)-0.5)*3
+        v = -1 * ( raw_val - upper ) / (upper - lower)
+        if v > 1:
+            return (v-1)*0.1+1
+        elif v < 0:
+            return v*2
+        else: 
+            return v
+        # val = 1 - raw_val/baseline
+        # return #(sigmoid(val-2)-0.5) if val >= 0 else (sigmoid(val)-0.5)*3
     else:
-        val = raw_val/baseline - 1
-        return (sigmoid(val-2)-0.5) if val >= 0 else (sigmoid(val)-0.5)*3
+        v = ( raw_val - lower ) / (upper - lower)
+        if v > 1:
+            return (v-1)*0.1+1
+        elif v < 0:
+            return v*2
+        else: 
+            return v
+        # val = raw_val/baseline - 1
+        # return v# (sigmoid(val-2)-0.5) if val >= 0 else (sigmoid(val)-0.5)*3
 
 
 class OpTree:
@@ -406,7 +420,7 @@ def gen_population(size):
     population = []
     while len(population)<size:
         for i in range(size):
-            exp = OpTree(3, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
+            exp = OpTree(4, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
             population.append(exp)
         population = list(set(population))
     return population
@@ -521,7 +535,7 @@ def evolution(verbose=False):
             if True: #is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
                 is_stats = {'sharpe': np.mean(sharpe_year[1:8]), 'sharpe_lt':  np.mean(sharpe_year[1:8]), 'sharpe_st':  np.mean(sharpe_year[6:8]), 'fitness': np.mean(fitness_year[1:8]), 'turnover': np.mean(turnover_year[1:8]), 'margin': np.mean(margin_year[1:8]), 'drawdown': np.mean(maxdrawdown_year[1:8]), 'returns': np.mean(returns_year[1:8])} # alpha_stats['is']
                 if float(is_stats['turnover'])>0.01 and float(is_stats['returns'])>-0.1 and float(is_stats['sharpe'])>-1 and float(is_stats['fitness'])>-0.5: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
-                    score = (objective_scoring(float(is_stats['sharpe_lt']), 2) + objective_scoring(float(is_stats['sharpe_st']), 2.8) + objective_scoring(float(is_stats['fitness']), 1.6) + objective_scoring(max(float(is_stats['turnover']), 0.125), 0.2, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+                    score = (objective_scoring(float(is_stats['sharpe_lt']), 3.8, 1.8) + objective_scoring(float(is_stats['sharpe_st']), 5.2, 2.2) + objective_scoring(float(is_stats['fitness']), 2.7, 1.7) + objective_scoring(max(float(is_stats['turnover']), 0.06), 0.45, 0.125, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
 
                     if score:
 
