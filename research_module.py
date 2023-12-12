@@ -564,8 +564,8 @@ def evolution(verbose=False):
                     child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
                     child.y.y.y.y = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
                 else:
-                    child.x.x.x = OP(x_lst= [ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ] , y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
-                    child.y.y.y = OP(x_lst= [ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ] , y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
+                    child.x.x.x = OP(x_lst= [ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ] , y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
+                    child.y.y.y = OP(x_lst= [ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ] , y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
             children_population.append(child)
         
         parent_population = children_population
