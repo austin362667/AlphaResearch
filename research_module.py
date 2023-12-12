@@ -229,8 +229,8 @@ diff2op_map = {
     'regression_neut': 'regression_neut({x}, {y})',
 }
 
-ops_y_map = ops_map.replace('{x}', '{y}')
-ops_map.update(ops_y_map)
+for k, v in ops_map.items():
+    ops_map[f"{k}_y"] = v.replace('{x}', '{y}')
 ops_map.update(diff2op_map)
 # decay1op_map = {
 
