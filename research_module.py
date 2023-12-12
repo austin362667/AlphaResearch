@@ -14,11 +14,11 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'GLB'
-UNIVERSE = 'MINVOL1M'
+REGION = 'TWN'
+UNIVERSE = 'TOP500'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'COUNTRY' 
+NEUTRALIZATION = 'SUBINDUSTRY' 
 
 DATASET_ID = 'pv104'
 
@@ -420,7 +420,7 @@ def gen_population(size):
     population = []
     while len(population)<size:
         for i in range(size):
-            exp = OpTree(4, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
+            exp = gen_expression()# OpTree(4, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
             population.append(exp)
         population = list(set(population))
     return population
@@ -519,7 +519,8 @@ def evolution(verbose=False):
             pnl_df['Drawdown'] = -1*(pnl_df['Peak'] - pnl_df['Pnl']) / pnl_df['Peak']
             maxdrawdown_year = [ -1*dd for dd in (pnl_df['Drawdown'].resample("Y").max()).values.tolist()]
             turnover_year = (tvr_df['Turnover'].resample("Y").mean()).values.tolist()
-            returns_year = np.multiply((pnl_df['Return'].resample("Y").sum()).values.tolist(), (252/pnl_df['Pnl'].resample("Y").count()).values.tolist())
+            # returns_year = np.multiply((pnl_df['Return'].resample("Y").sum()).values.tolist(), (252/pnl_df['Pnl'].resample("Y").count()).values.tolist())
+            returns_year = (pnl_df['Return'].resample("Y").sum()).values.tolist().values.tolist())
             sharpe_year = ((pnl_df['Return'].resample("Y").mean() /  (pnl_df['Return'].resample("Y")).std())*math.sqrt(252)).values.tolist()
             margin_year = ((pnl_df['Pnl'].copy().diff() / (tvr_df['Turnover'] * (2*10000000))).resample("Y").mean()*10000).values.tolist()
             fitness_year = sharpe_year * np.sqrt(np.divide([ abs(ret) for ret in returns_year ], [ max(tvr, 0.125) for tvr in turnover_year])) 
@@ -534,10 +535,10 @@ def evolution(verbose=False):
             alpha_stats = complete_alpha.response_data
             if True: #is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
                 is_stats = {'sharpe': np.mean(sharpe_year[1:8]), 'sharpe_lt':  np.mean(sharpe_year[1:8]), 'sharpe_st':  np.mean(sharpe_year[6:8]), 'fitness': np.mean(fitness_year[1:8]), 'turnover': np.mean(turnover_year[1:8]), 'margin': np.mean(margin_year[1:8]), 'drawdown': np.mean(maxdrawdown_year[1:8]), 'returns': np.mean(returns_year[1:8])} # alpha_stats['is']
-                if float(is_stats['turnover'])>0.01 and float(is_stats['returns'])>-0.1 and float(is_stats['sharpe'])>-1 and float(is_stats['fitness'])>-0.5: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
-                    score = (objective_scoring(float(is_stats['sharpe_lt']), 3.8, 1.8) + objective_scoring(float(is_stats['sharpe_st']), 5.2, 2.2) + objective_scoring(float(is_stats['fitness']), 2.7, 1.7) + objective_scoring(max(float(is_stats['turnover']), 0.06), 0.45, 0.125, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+                if float(is_stats['turnover'])>0 and float(is_stats['returns'])>-1 and float(is_stats['sharpe'])>-10 and float(is_stats['fitness'])>-10: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
+                    score = (objective_scoring(float(is_stats['sharpe_lt']), 3.8, 1.8) + objective_scoring(float(is_stats['sharpe_st']), 5.2, 2.2) + objective_scoring(float(is_stats['fitness']), 2.7, 1.7) + objective_scoring(max(float(is_stats['turnover']), 0.08), 0.5, 0.125, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
 
-                    if score:
+                    if score and np.mean(sharpe_year[8:-1])/np.mean(sharpe_year[5:8]) > 1:
 
                         for a_i in parent_population:
                             if str(a_i) == alpha_stats['regular']['code']:
@@ -558,8 +559,13 @@ def evolution(verbose=False):
             child = crossover(parent_a, parent_b)
             if random.random() < MUTATION_RATE:
                 # rn = random.randint(int(child.depth/2), child.depth)
-                child.modify_nth_op(child.depth, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map), OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
-                # child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
+                # child.modify_nth_op(child.depth, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map), OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
+                if random.random() < MUTATION_RATE:
+                    child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
+                    child.y.y.y.y = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
+                else:
+                    child.x.x.x = OP(x_lst= [ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ] , y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
+                    child.y.y.y = OP(x_lst= [ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ] , y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
             children_population.append(child)
         
         parent_population = children_population
