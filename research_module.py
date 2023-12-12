@@ -22,7 +22,7 @@ NEUTRALIZATION = 'SECTOR'
 
 DATASET_ID = 'pv104'
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 40
 GENERATION_EPOCH = 25
 MUTATION_RATE = 0.15
 OS_RATIO = 0.8
@@ -529,7 +529,7 @@ def evolution(verbose=False):
             maxdrawdown_year = [ -1*dd for dd in (pnl_df['Drawdown'].resample("Y").max()).values.tolist()]
             turnover_year = (tvr_df['Turnover'].resample("Y").mean()).values.tolist()
             # returns_year = np.multiply((pnl_df['Return'].resample("Y").sum()).values.tolist(), (252/pnl_df['Pnl'].resample("Y").count()).values.tolist())
-            returns_year = (pnl_df['Return'].resample("Y").sum()).values.tolist().values.tolist()
+            returns_year = (pnl_df['Return'].resample("Y").sum()).values.tolist()
             sharpe_year = ((pnl_df['Return'].resample("Y").mean() /  (pnl_df['Return'].resample("Y")).std())*math.sqrt(252)).values.tolist()
             margin_year = ((pnl_df['Pnl'].copy().diff() / (tvr_df['Turnover'] * (2*10000000))).resample("Y").mean()*10000).values.tolist()
             fitness_year = sharpe_year * np.sqrt(np.divide([ abs(ret) for ret in returns_year ], [ max(tvr, 0.125) for tvr in turnover_year])) 
@@ -547,7 +547,7 @@ def evolution(verbose=False):
                 if float(is_stats['turnover'])>0 and float(is_stats['returns'])>-1 and float(is_stats['sharpe'])>-10 and float(is_stats['fitness'])>-10: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
                     score = (objective_scoring(float(is_stats['sharpe_lt']), 3.8, 1.8) + objective_scoring(float(is_stats['sharpe_st']), 5.2, 2.2) + objective_scoring(float(is_stats['fitness']), 2.7, 1.7) + objective_scoring(max(float(is_stats['turnover']), 0.08), 0.5, 0.125, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
 
-                    if score and np.mean(sharpe_year[8:-1])/np.mean(sharpe_year[5:8]) > 1:
+                    if score and np.mean(sharpe_year[8:-1])/np.mean(sharpe_year[5:8]) > 0.85:
 
                         for a_i in parent_population:
                             if str(a_i) == alpha_stats['regular']['code']:
