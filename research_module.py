@@ -124,7 +124,7 @@ day_lst = [3,4,5,7,10,15,22,44,66,132,198,252]
 grp_lst =  [ f"densify({g})" for g in grp_data_lst+other455+pv13+['subindustry', 'industry', 'sector', 'exchange', 'country', 'market']] 
 
 
-ops_map = {
+ops_x_map = {
 # ts1op_map = 
     'ts_delay': 'ts_delay({x}, {d})',
     'ts_rank': 'ts_rank({x}, {d})',
@@ -228,11 +228,13 @@ diff2op_map = {
     'ts_covariance': 'ts_covariance({x}, {y}, {d})',
     'regression_neut': 'regression_neut({x}, {y})',
 }
-ops_y_map = ops_map
-for k, v in ops_map.items():
+ops_map = {}
+for k, v in ops_x_map.items():
     ops_y_map[f"{k}_y"] = v.replace('{x}', '{y}')
-ops_y_map.update(diff2op_map)
-ops_map = ops_y_map
+ops_map.update(ops_x_map)
+ops_map.update(ops_y_map))
+ops_map.update(diff2op_map)
+
 # decay1op_map = {
 
 # }
