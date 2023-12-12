@@ -229,6 +229,7 @@ diff2op_map = {
     'regression_neut': 'regression_neut({x}, {y})',
 }
 ops_map = {}
+ops_y_map = {}
 for k, v in ops_x_map.items():
     ops_y_map[f"{k}_y"] = v.replace('{x}', '{y}')
 ops_map.update(ops_x_map)
