@@ -547,7 +547,7 @@ def evolution(verbose=False):
                 if float(is_stats['turnover'])>0 and float(is_stats['returns'])>-1 and float(is_stats['sharpe'])>-10 and float(is_stats['fitness'])>-10: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
                     score = (objective_scoring(float(is_stats['sharpe_lt']), 3.8, 1.8) + objective_scoring(float(is_stats['sharpe_st']), 4.2, 2.2) + objective_scoring(float(is_stats['fitness']), 2.7, 1.5) + objective_scoring(max(float(is_stats['turnover']), 0.08), 0.6, 0.25, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
 
-                    if score: # and abs(np.mean(sharpe_year[8:-1])/np.mean(sharpe_year[5:8])) > 0.7:
+                    if score and abs(np.mean(sharpe_year[8:-1])/np.mean(sharpe_year[5:8])) > 0.6:
 
                         for a_i in parent_population:
                             if str(a_i) == alpha_stats['regular']['code']:
