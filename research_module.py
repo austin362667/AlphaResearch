@@ -14,16 +14,16 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'GLB'
-UNIVERSE = 'MINVOL1M'
+REGION = 'USA'
+UNIVERSE = 'ILLIQUID_MINVOL1M'
 DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'SUBINDUSTRY' 
 
-DATASET_ID = 'model109'
+DATASET_ID = 'option9'
 
-POPULATION_SIZE = 1000
-GENERATION_EPOCH = 10
+POPULATION_SIZE = 200
+GENERATION_EPOCH = 15
 MUTATION_RATE = 0.25
 OS_RATIO = 0.8
 
@@ -110,14 +110,14 @@ except:
 
 data_lst = []
 try:
-    data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='VECTOR')
+    data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 except:
     data_lst = []
 data_x_lst = data_lst
-data_y_lst = data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
+data_y_lst = data_lst + ['close']# ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
-x_lst = [ f"ts_backfill(vec_avg({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
+x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
 y_lst = [ f"ts_backfill(({d}), 252)" for d in data_y_lst ] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [3,4,5,7,10,15,22,44,66,132,198,252]
