@@ -14,15 +14,15 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'USA'
-UNIVERSE = 'ILLIQUID_MINVOL1M'
+REGION = 'GLB'
+UNIVERSE = 'MINVOL1M'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'SUBINDUSTRY' 
+NEUTRALIZATION = 'COUNTRY' 
 
-DATASET_ID = 'option9'
+DATASET_ID = 'model216'
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 50
 GENERATION_EPOCH = 15
 MUTATION_RATE = 0.25
 OS_RATIO = 0.8
@@ -114,7 +114,7 @@ try:
 except:
     data_lst = []
 data_x_lst = data_lst
-data_y_lst = data_lst + ['close']# ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
+data_y_lst = data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
 x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
