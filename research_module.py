@@ -543,7 +543,7 @@ def evolution(verbose=False):
 
             alpha_stats = complete_alpha.response_data
             if True: #is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
-                n = 6
+                n = 1
                 is_stats = {'sharpe': np.mean(sharpe_year[n:-3]), 'sharpe_lt':  np.mean(sharpe_year[n:-3]), 'sharpe_st':  np.mean(sharpe_year[-5:-3]), 'fitness': np.mean(fitness_year[n:-3]), 'turnover': np.mean(turnover_year[n:-3]), 'margin': np.mean(margin_year[n:-3]), 'drawdown': np.mean(maxdrawdown_year[n:-3]), 'returns': np.mean(returns_year[n:-3])} # alpha_stats['is']
                 if float(is_stats['turnover'])>0 and float(is_stats['returns'])>-1 and float(is_stats['sharpe'])>-10 and float(is_stats['fitness'])>-10: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
                     score = (objective_scoring(float(is_stats['sharpe_lt']), 3.8, 1.8) + objective_scoring(float(is_stats['sharpe_st']), 4.2, 2.2) + objective_scoring(float(is_stats['fitness']), 2.7, 1.5) + objective_scoring(max(float(is_stats['turnover']), 0.08), 0.6, 0.25, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
