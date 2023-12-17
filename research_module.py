@@ -14,13 +14,13 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'ASI'
-UNIVERSE = 'MINVOL1M'
+REGION = 'TWN'
+UNIVERSE = 'TOP500'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'COUNTRY' 
+NEUTRALIZATION = 'SUBINDUSTRY' 
 
-DATASET_ID = 'shortinterest6'
+DATASET_ID = 'model216'
 
 POPULATION_SIZE = 100
 GENERATION_EPOCH = 15
@@ -110,15 +110,15 @@ except:
 
 data_lst = []
 try:
-    data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
+    data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='VECTOR')
 except:
     data_lst = []
 data_x_lst = data_lst
 data_y_lst = data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
-x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
-y_lst = [ f"ts_backfill(({d}), 252)" for d in data_y_lst ] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
+x_lst = [ f"ts_backfill(vec_avg({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
+y_lst = [ f"ts_backfill(vec_avg({d}), 252)" for d in data_y_lst ] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [3,4,5,7,10,15,22,44,66,132,198,252]
 grp_lst =  [ f"densify({g})" for g in grp_data_lst+other455+pv13+['subindustry', 'industry', 'sector', 'exchange', 'country', 'market']] 
@@ -543,7 +543,7 @@ def evolution(verbose=False):
 
             alpha_stats = complete_alpha.response_data
             if True: #is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
-                n = 1
+                n = 6
                 is_stats = {'sharpe': np.mean(sharpe_year[n:-3]), 'sharpe_lt':  np.mean(sharpe_year[n:-3]), 'sharpe_st':  np.mean(sharpe_year[-5:-3]), 'fitness': np.mean(fitness_year[n:-3]), 'turnover': np.mean(turnover_year[n:-3]), 'margin': np.mean(margin_year[n:-3]), 'drawdown': np.mean(maxdrawdown_year[n:-3]), 'returns': np.mean(returns_year[n:-3])} # alpha_stats['is']
                 if float(is_stats['turnover'])>0 and float(is_stats['returns'])>-1 and float(is_stats['sharpe'])>-10 and float(is_stats['fitness'])>-10: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
                     score = (objective_scoring(float(is_stats['sharpe_lt']), 3.8, 1.8) + objective_scoring(float(is_stats['sharpe_st']), 4.2, 2.2) + objective_scoring(float(is_stats['fitness']), 2.7, 1.5) + objective_scoring(max(float(is_stats['turnover']), 0.08), 0.6, 0.25, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
