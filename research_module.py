@@ -113,7 +113,7 @@ try:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 except:
     data_lst = []
-data_x_lst = ['last_diff_value(opt4, 10)', 'last_diff_value(opt4, 10)-close']# data_lst
+data_x_lst = ['last_diff_value(opt4_ask, 10)', 'last_diff_value(opt4_ask, 10)-close']# data_lst
 data_y_lst = ['close'] #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
