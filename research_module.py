@@ -222,7 +222,7 @@ diff2op_map = {
     'df_when_std05': 'trade_when(ts_std_dev({x}, {d})>0.5, {y}, -1)',
     'df_when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {y}, -1)',
     'df_when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {y}, -1)',
-    'df_when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {y}, -1)'
+    'df_when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {y}, -1)',
     'sub': 'subtract({x}, {y})',
     'div': 'divide({x}, {y})',
     'mas': 'ts_mean({x}, {d})-ts_mean({y}, {d})',
