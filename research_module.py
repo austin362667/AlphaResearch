@@ -22,7 +22,7 @@ NEUTRALIZATION = 'MARKET'
 
 DATASET_ID = 'option4'
 
-POPULATION_SIZE = 100
+POPULATION_SIZE = 200
 GENERATION_EPOCH = 15
 MUTATION_RATE = 0.25
 OS_RATIO = 0.8
@@ -126,14 +126,14 @@ grp_lst =  [ f"densify({g})" for g in grp_data_lst+other455+pv13+['subindustry',
 
 ops_x_map = {
 # ts1op_map = 
-    'when_grk1': 'trade_when(group_rank({x}, {g})>0.5, {x}, -1)',
-    'when_grk0': 'trade_when(group_rank({x}, {g})<0.5, {x}, -1)',
-    'when_trk1': 'trade_when(ts_rank({x}, {d})>0.5, {x}, -1)',
-    'when_trk0': 'trade_when(ts_rank({x}, {d})<0.5, {x}, -1)',
-    'when_std05': 'trade_when(ts_std_dev({x}, {d})>0.5, {x}, -1)',
-    'when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {x}, -1)',
-    'when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {x}, -1)',
-    'when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {x}, -1)',
+   # 'when_grk1': 'trade_when(group_rank({x}, {g})>0.5, {x}, -1)',
+   # 'when_grk0': 'trade_when(group_rank({x}, {g})<0.5, {x}, -1)',
+   # 'when_trk1': 'trade_when(ts_rank({x}, {d})>0.5, {x}, -1)',
+   # 'when_trk0': 'trade_when(ts_rank({x}, {d})<0.5, {x}, -1)',
+   # 'when_std05': 'trade_when(ts_std_dev({x}, {d})>0.5, {x}, -1)',
+   # 'when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {x}, -1)',
+   # 'when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {x}, -1)',
+   # 'when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {x}, -1)',
     'ldv': 'last_diff_value({x}, {d})',
     'ts_delay': 'ts_delay({x}, {d})',
     'ts_rank': 'ts_rank({x}, {d})',
@@ -215,14 +215,14 @@ ops_x_map = {
 }
 
 diff2op_map = {
-    'df_when_grk1': 'trade_when(group_rank({x}, {g})>0.5, {y}, -1)',
-    'df_when_grk0': 'trade_when(group_rank({x}, {g})<0.5, {y}, -1)',
-    'df_when_trk1': 'trade_when(ts_rank({x}, {d})>0.5, {y}, -1)',
-    'df_when_trk0': 'trade_when(ts_rank({x}, {d})<0.5, {y}, -1)',
-    'df_when_std05': 'trade_when(ts_std_dev({x}, {d})>0.5, {y}, -1)',
-    'df_when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {y}, -1)',
-    'df_when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {y}, -1)',
-    'df_when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {y}, -1)',
+    #'df_when_grk1': 'trade_when(group_rank({x}, {g})>0.5, {y}, -1)',
+    #'df_when_grk0': 'trade_when(group_rank({x}, {g})<0.5, {y}, -1)',
+    #'df_when_trk1': 'trade_when(ts_rank({x}, {d})>0.5, {y}, -1)',
+    #'df_when_trk0': 'trade_when(ts_rank({x}, {d})<0.5, {y}, -1)',
+    #'df_when_std05': 'trade_when(ts_std_dev({x}, {d})>0.5, {y}, -1)',
+    #'df_when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {y}, -1)',
+    #'df_when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {y}, -1)',
+    #'df_when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {y}, -1)',
     'sub': 'subtract({x}, {y})',
     'div': 'divide({x}, {y})',
     'mas': 'ts_mean({x}, {d})-ts_mean({y}, {d})',
