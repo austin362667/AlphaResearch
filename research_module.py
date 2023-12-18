@@ -318,8 +318,8 @@ class OP:
 
 def roulette_wheel(population):
     n = len(population)
-    shoot = random.randint(0, math.floor(n*n*n))
-    select = min(math.floor(math.pow(shoot,1/3)), n-1)
+    shoot = random.randint(0, math.floor(math.pow(n,5)))
+    select = min(math.floor(math.pow(shoot,1/5)), n-1)
     return population[select]
 
 def sigmoid(x):
