@@ -14,7 +14,7 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'GLB'
+REGION = 'USA'
 UNIVERSE = 'TOP3000'
 DECAY = 0
 DELAY = 1
@@ -22,7 +22,7 @@ NEUTRALIZATION = 'MARKET'
 
 DATASET_ID = 'option4'
 
-POPULATION_SIZE = 50
+POPULATION_SIZE = 100
 GENERATION_EPOCH = 15
 MUTATION_RATE = 0.25
 OS_RATIO = 0.8
@@ -113,8 +113,8 @@ try:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 except:
     data_lst = []
-data_x_lst = ['last_diff_value(opt4_ask, 10)', 'last_diff_value(opt4_ask, 10)-close']# data_lst
-data_y_lst = ['close'] #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
+data_x_lst = [ da if 'delta' in dafor da in data_lst ]
+data_y_lst = [ da if 'delta' in dafor da in data_lst ]#data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
 x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
@@ -318,8 +318,8 @@ class OP:
 
 def roulette_wheel(population):
     n = len(population)
-    shoot = random.randint(0, math.floor(math.pow(n,5)))
-    select = min(math.floor(math.pow(shoot,1/5)), n-1)
+    shoot = random.randint(0, math.floor(math.pow(n,3)))
+    select = min(math.floor(math.pow(shoot,1/3)), n-1)
     return population[select]
 
 def sigmoid(x):
