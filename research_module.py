@@ -134,7 +134,7 @@ ops_x_map = {
     'when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {x}, -1)',
     'when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {x}, -1)',
     'when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {x}, -1)',
-    'last_diff_value({x}, {d})',
+    'ldv': 'last_diff_value({x}, {d})',
     'ts_delay': 'ts_delay({x}, {d})',
     'ts_rank': 'ts_rank({x}, {d})',
     'ts_quantile_gaussian': 'ts_quantile({x}, {d}, driver="gaussian")',
