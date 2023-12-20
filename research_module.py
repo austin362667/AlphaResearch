@@ -20,7 +20,7 @@ DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'SUBINDUSTRY' 
 
-DATASET_ID = 'pv104'
+DATASET_ID = 'option4'
 
 POPULATION_SIZE = 100
 GENERATION_EPOCH = 15
@@ -113,8 +113,8 @@ try:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='MATRIX')
 except:
     data_lst = []
-data_x_lst = data_lst # filter(lambda x: 'call' in x and 'vola' in x and 'delta' in x, data_lst)
-data_y_lst = data_lst # filter(lambda x: 'put' in x and 'vola' in x and 'delta' in x, data_lst) #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
+data_x_lst = filter(lambda x: 'call' in x and 'vola' in x and 'delta' in x, data_lst)
+data_y_lst = filter(lambda x: 'put' in x and 'vola' in x and 'delta' in x, data_lst) #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
 x_lst = [ f"ts_backfill(({d}), 252)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
