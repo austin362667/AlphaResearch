@@ -18,11 +18,11 @@ REGION = 'USA'
 UNIVERSE = 'TOP3000'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'FAST' 
+NEUTRALIZATION = 'SUBINDUSTRY' 
 
 DATASET_ID = 'model216'
 
-POPULATION_SIZE = 100
+POPULATION_SIZE = 50
 GENERATION_EPOCH = 20
 MUTATION_RATE = 0.25
 OS_RATIO = 0.8
@@ -336,7 +336,7 @@ def objective_scoring(raw_val, upper, lower, reverse = False):
         if v > 1:
             return (v-1)*0.5+1
         elif v < 0:
-            return v*1.3
+            return v*1.5
         else: 
             return v
         # val = 1 - raw_val/baseline
@@ -346,7 +346,7 @@ def objective_scoring(raw_val, upper, lower, reverse = False):
         if v > 1:
             return (v-1)*0.5+1
         elif v < 0:
-            return v*1.3
+            return v*1.5
         else: 
             return v
         # val = raw_val/baseline - 1
@@ -543,10 +543,12 @@ def evolution(verbose=False):
             tvr_df = tvr_df.set_index("Date")
             tvr_df = pd.DataFrame(tvr_df,columns=["Turnover"])
 
-            pnl_df['Last'] = pnl_df['Pnl'].resample("Y").last()
-            pnl_df['Peak'] = pnl_df['Pnl'].cummax()
-            pnl_df['Drawdown'] = -1*(pnl_df['Peak'] - pnl_df['Pnl']) / pnl_df['Peak']
-            maxdrawdown_year = [ -1*dd for dd in (pnl_df['Drawdown'].resample("Y").max()).values.tolist()]
+            
+            pnl_df['Cumulative'] = pnl_df['Pnl'].round(2)
+            pnl_df['HighValue'] = pnl_df['Cumulative'].cummax()
+            pnl_df['Drawdown'] = (pnl_df['Cumulative'] - pnl_df['HighValue']) / pnl_df['HighValue']
+            pnl_df.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
+            maxdrawdown_year = [ -1*dd for dd in (pnl_df['Drawdown'].resample("Y").mean()).values.tolist()]
             turnover_year = (tvr_df['Turnover'].resample("Y").mean()).values.tolist()
             # returns_year = np.multiply((pnl_df['Return'].resample("Y").sum()).values.tolist(), (252/pnl_df['Pnl'].resample("Y").count()).values.tolist())
             returns_year = (pnl_df['Return'].resample("Y").sum()).values.tolist()
@@ -565,10 +567,10 @@ def evolution(verbose=False):
             if True: #is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
                 n = 6
                 is_stats = {'sharpe': np.mean(sharpe_year[n:-2]), 'sharpe_lt':  np.mean(sharpe_year[n:-2]), 'sharpe_st':  np.mean(sharpe_year[-4:-2]), 'fitness': np.mean(fitness_year[n:-2]), 'turnover': np.mean(turnover_year[n:-2]), 'margin': np.mean(margin_year[n:-2]), 'drawdown': np.mean(maxdrawdown_year[n:-2]), 'returns': np.mean(returns_year[n:-2])} # alpha_stats['is']
-                if float(is_stats['turnover'])>0 and float(is_stats['returns'])>-1 and float(is_stats['sharpe'])>-10 and float(is_stats['fitness'])>-10: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
-                    score = (objective_scoring(float(is_stats['sharpe_lt']), 3.8, 1.8) + objective_scoring(float(is_stats['sharpe_st']), 4.2, 2.2) + objective_scoring(float(is_stats['fitness']), 2.7, 1.5) + objective_scoring(max(float(is_stats['turnover']), 0.08), 0.6, 0.25, True))/4 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+                if float(is_stats['turnover'])!=0 and float(is_stats['returns'])!=0 and float(is_stats['sharpe'])!=0 and float(is_stats['fitness'])!=0: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
+                    score = (objective_scoring(float(is_stats['sharpe_lt']), 3, 1.5) + objective_scoring(float(is_stats['sharpe_st']), 4, 2) + objective_scoring(float(is_stats['fitness']), 3, 1.5) + objective_scoring(max(float(is_stats['turnover']), 0.1), 0.6, 0.3, True) + objective_scoring(float(is_stats['margin']), 20, 10) + objective_scoring(float(is_stats['drawdown']), 0.05, 0.01, True))/6 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
 
-                    if score and abs(np.mean(sharpe_year[-2:-1])/np.mean(sharpe_year[-3:-1])) > 0.6:
+                    if score and np.mean(sharpe_year[-3:-1])>0:#abs(np.mean(sharpe_year[-2:-1])/np.mean(sharpe_year[-3:-1])) > 0.6:
                         for a_i in parent_population:
                             if str(a_i) == alpha_stats['regular']['code']:
                                 alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'fitness':is_stats['fitness'], 'sharpe':is_stats['sharpe'], 'margin': is_stats['margin'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
