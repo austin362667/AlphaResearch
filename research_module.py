@@ -122,7 +122,7 @@ x_lst = [ f"ts_backfill(vec_avg({d}), 132)" for d in data_x_lst ] # ['ts_backfil
 y_lst = [ f"ts_backfill(vec_avg({d}), 132)" for d in data_y_lst ] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(close, 252)'] # ['ts_backfill(vec_avg(oth84_1_lastearningseps), 132)']
 
 day_lst = [3,4,5,7,10,15,22,44,66,132,198,252]
-grp_lst =  [ f"densify({g})" for g in grp_data_lst+other455+pv13+['subindustry', 'industry', 'sector', 'exchange', 'country', 'market']] 
+grp_lst =  [ f"densify({g})" for g in grp_data_lst+other455+pv13+['subindustry', 'industry', 'sector', 'market']] 
 
 
 ops_x_map = {
