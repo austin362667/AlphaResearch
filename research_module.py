@@ -114,8 +114,8 @@ try:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='VECTOR')
 except:
     data_lst = []
-data_x_lst = ['oth84_1_wshactualeps']  # data_lst # ['opt4_60_call_vola_delta45'] # filter(lambda x: 'call' in x and 'vola' in x and 'delta' in x, data_lst)
-data_y_lst = ['oth84_1_lastearningseps']  # data_lst # ['opt4_60_put_vola_delta45'] # filter(lambda x: 'put' in x and 'vola' in x and 'delta' in x, data_lst) #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
+data_x_lst = ['oth84_wshactualeps']  # data_lst # ['opt4_60_call_vola_delta45'] # filter(lambda x: 'call' in x and 'vola' in x and 'delta' in x, data_lst)
+data_y_lst = ['oth84_lastearningseps']  # data_lst # ['opt4_60_put_vola_delta45'] # filter(lambda x: 'put' in x and 'vola' in x and 'delta' in x, data_lst) #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 
 x_lst = [ f"ts_backfill(vec_avg({d}), 132)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
