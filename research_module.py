@@ -483,7 +483,7 @@ def generate_tree(depth, x_lst, y_lst, d_lst, g_lst, ops_map):
     op_node = OP(x_lst, y_lst, d_lst, g_lst, ops_map)
     if depth == chromosome_len:
         op_node.x_lst+=when_val
-        op_node.ops_map+=whenop_map
+        op_node.ops_map.update(whenop_map)
     
     op_node.x = generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
     op_node.y = generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
