@@ -301,7 +301,7 @@ ops_map.update(ops_x_map)
 ops_map.update(ops_y_map)
 ops_map.update(diff2op_map)
 
-print(f'Paramaters Approximate Space: {whenop_map * pow(ops_map, chromosome_len-1) * x_lst * y_lst * day_lst * grp_lst}')
+print(f'Paramaters Approximate Space: {len(whenop_map) * pow(len(ops_map), chromosome_len-1) * len(x_lst) * len(y_lst) * len(day_lst) * len(grp_lst)}')
 # ops_map.update(whenop_map)
 
 # decay1op_map = {
