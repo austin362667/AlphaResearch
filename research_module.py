@@ -478,9 +478,18 @@ def generate_tree(depth, x_lst, y_lst, d_lst, g_lst, ops_map):
     if depth <= 1:
         return OP(x_lst, y_lst, d_lst, g_lst, ops_map)
     
+    when_val = ['ts_std_dev(returns, 5)', 'ts_std_dev(returns, 22)', 'ts_std_dev(returns, 66)', 'ts_std_dev(volume, 5)', 'ts_std_dev(volume, 22)', 'ts_corr(volume, ts_step(5), 5)', 'ts_corr(volume, ts_step(22), 22)', 'adv20']
+
     op_node = OP(x_lst, y_lst, d_lst, g_lst, ops_map)
+    if depth == chromosome_len:
+        op_node.x_lst+=when_val
+        op_node.ops_map+=whenop_map
+    
     op_node.x = generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
     op_node.y = generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
+    
+    # parent_node = OP(], y_lst, day_lst, grp_lst, whenop_map)
+
     return op_node
     
 def crossover(parent_a, parent_b):
@@ -498,8 +507,7 @@ def gen_population(size):
     while len(population)<size:
         for i in range(size):
             exp = gen_expression()# OpTree(4, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
-            parent_node = OP([exp]+['ts_std_dev(returns, 5)', 'ts_std_dev(returns, 22)', 'ts_std_dev(returns, 66)', 'ts_std_dev(volume, 5)', 'ts_std_dev(volume, 22)', 'ts_corr(volume, ts_step(5), 5)', 'ts_corr(volume, ts_step(22), 22)', 'adv20'], exp, day_lst, grp_lst, whenop_map)
-            population.append(parent_node)
+            population.append(exp)
         population = list(set(population))
     return population
 
