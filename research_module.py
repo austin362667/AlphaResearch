@@ -26,6 +26,7 @@ POPULATION_SIZE = 100
 GENERATION_EPOCH = 20
 MUTATION_RATE = 0.25
 OS_RATIO = 0.8
+chromosome_len = 2
 
 
 
@@ -147,6 +148,8 @@ ops_x_map = {
     'ts_mean': 'ts_mean({x}, {d})',
     'ts_delta': 'ts_delta({x}, {d})',
     'ts_av_diff': 'ts_av_diff({x}, {d})',
+    'ts_av_diff_': 'ts_av_diff({x}, {d})',
+    'ts_av_diff__': 'ts_av_diff({x}, {d})',
     'ts_ir': 'ts_ir({x}, {d})',
     'ts_zscore': 'ts_zscore({x}, {d})',
     'ts_returns': "ts_returns({x}, {d})",
@@ -176,13 +179,18 @@ ops_x_map = {
 
 # grp1op_map = {
     'grp_rank': 'group_rank({x}, {g})',
+    'grp_rank_': 'group_rank({x}, {g})',
+    'grp_rank__': 'group_rank({x}, {g})',
     'scale': 'scale({x}, scale=1, longscale=1, shortscale=1)',
     'grp_zscore': 'group_zscore({x}, {g})',
     'grp_neut': 'group_neutralize({x}, ({g}))',
+    'grp_neut_': 'group_neutralize({x}, ({g}))',
+    'grp_neut__': 'group_neutralize({x}, ({g}))',
     'grp_norm': 'group_normalize({x}, {g})',
     'grp_scale': 'group_scale({x}, {g})',
     'group_frac': '{x}/group_sum({x}, {g})',
     'grp_diff_median': '{x}-group_median({x}, {g})',
+    'grp_diff_median_': '{x}-group_median({x}, {g})',
     'grp_diff_mean': '{x}-group_mean({x}, 1, {g})',
     'grp_diff_mean_adv': '{x}-group_mean({x}, cap, {g})',
     'grp_diff_mean_cap': '{x}-group_mean({x}, adv20, {g})',
@@ -196,9 +204,13 @@ ops_x_map = {
     'log_diff': 'log_diff({x})',
     's_log_1p': 's_log_1p({x})',
     'reverse': 'reverse({x})',
+    'reverse_': 'reverse({x})',
+    'reverse__': 'reverse({x})',
     'inverse': 'inverse({x})',
     'ts_mean': "ts_mean({x}, {d})",
     'ts_decay_linear': "ts_decay_linear({x}, {d})",
+    'ts_decay_linear_': "ts_decay_linear({x}, {d})",
+    'ts_decay_linear__': "ts_decay_linear({x}, {d})",
     'ts_decay_linear_av_diff': "ts_decay_linear(ts_av_diff({x}, {d})>0, {d})",
     'ts_decay_linear_delta_bin': "ts_decay_linear(ts_delta({x}, {d})>0, {d})",
     'ts_decay_linear_ts_rank_bin': "ts_decay_linear(ts_rank({x}, {d})>0.5, {d})",
@@ -214,15 +226,28 @@ ops_x_map = {
     'winsorize_4': "winsorize({x}, std = 10)",
 }
 
+whenop_map = {
+    'df_when_grk1': 'trade_when(group_rank({x}, {g})>0.5, {x}, -1)',
+    'df_when_grk0': 'trade_when(group_rank({x}, {g})<0.5, {x}, -1)',
+    'df_when_trk1': 'trade_when(ts_rank({x}, {d})>0.5, {x}, -1)',
+    'df_when_trk0': 'trade_when(ts_rank({x}, {d})<0.5, {x}, -1)',
+    'df_when_std05': 'trade_when(ts_std_dev({x}, {d})>0.5, {x}, -1)',
+    'df_when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {x}, -1)',
+    'df_when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {x}, -1)',
+    'df_when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {x}, -1)',
+    
+    'df_when_grk1_y': 'trade_when(group_rank({x}, {g})>0.5, {y}, -1)',
+    'df_when_grk0_y': 'trade_when(group_rank({x}, {g})<0.5, {y}, -1)',
+    'df_when_trk1_y': 'trade_when(ts_rank({x}, {d})>0.5, {y}, -1)',
+    'df_when_trk0_y': 'trade_when(ts_rank({x}, {d})<0.5, {y}, -1)',
+    'df_when_std05_y': 'trade_when(ts_std_dev({x}, {d})>0.5, {y}, -1)',
+    'df_when_std1_y': 'trade_when(ts_std_dev({x}, {d})>1, {y}, -1)',
+    'df_when_std2_y': 'trade_when(ts_std_dev({x}, {d})>2, {y}, -1)',
+    'df_when_std3_y': 'trade_when(ts_std_dev({x}, {d})>3, {y}, -1)',
+}
+
+
 diff2op_map = {
-    #'df_when_grk1': 'trade_when(group_rank({x}, {g})>0.5, {y}, -1)',
-    #'df_when_grk0': 'trade_when(group_rank({x}, {g})<0.5, {y}, -1)',
-    #'df_when_trk1': 'trade_when(ts_rank({x}, {d})>0.5, {y}, -1)',
-    #'df_when_trk0': 'trade_when(ts_rank({x}, {d})<0.5, {y}, -1)',
-    #'df_when_std05': 'trade_when(ts_std_dev({x}, {d})>0.5, {y}, -1)',
-    #'df_when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {y}, -1)',
-    #'df_when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {y}, -1)',
-    #'df_when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {y}, -1)',
     'sub': 'subtract({x}, {y})',
     'div': 'divide({x}, {y})',
     'mas': 'ts_mean({x}, {d})-ts_mean({y}, {d})',
@@ -243,6 +268,27 @@ diff2op_map = {
     'ts_co_skewness': 'ts_co_skewness({x}, {y}, {d})',
     'ts_covariance': 'ts_covariance({x}, {y}, {d})',
     'regression_neut': 'regression_neut({x}, {y})',
+    
+    'sub_r': 'subtract({y}, {x})',
+    'div_r': 'divide({y}, {x})',
+    'mas_r': 'ts_mean({y}, {d})-ts_mean({x}, {d})',
+    'mad_r': 'ts_mean({y}, {d})/ts_mean({x}, {d})',
+    'mts_r': 'ts_returns({y}, {d})-ts_returns({x}, {d})',
+    'vec_neut_r': 'vector_neut({y}, {x})',
+    'ts_reg_r': 'ts_regression({y}, {x}, {d})',
+    'ts_reg_grp_med_r': 'ts_regression({y}, group_median({x}, {g}), {d})',
+    'ts_reg_grp_mean_r': 'ts_regression({y}, group_mean({x}, 1, {g}), {d})',
+    'ts_reg_grp_mean_cap_r': 'ts_regression({y}, group_mean({x}, cap, {g}), {d})',
+    'ts_reg_ret_r': 'ts_regression(ts_returns({y}), ts_returns({x}), {d})',
+    'ts_vec_neut_r': 'ts_vector_neut({y}, {x}, {d})',
+    'ts_vec_neut_grp_med_r': 'ts_vector_neut({y}, group_median({x}, {g}), {d})',
+    'ts_vec_neut_grp_mean_r': 'ts_vector_neut({y}, group_mean({x}, 1, {g}), {d})',
+    'ts_vec_neut_grp_mean_cap_r': 'ts_vector_neut({y}, group_mean({x}, cap, {g}), {d})',
+    'ts_vec_neut_ret_r': 'ts_vector_neut(ts_returns({y}), ts_returns({x}), {d})',
+    'ts_co_kurtosis_r': 'ts_co_kurtosis({y}, {x}, {d})',
+    'ts_co_skewness_r': 'ts_co_skewness({y}, {x}, {d})',
+    'ts_covariance_r': 'ts_covariance({y}, {x}, {d})',
+    'regression_neut_r': 'regression_neut({y}, {x})',
 }
 ops_map = {}
 ops_y_map = {}
@@ -254,7 +300,9 @@ for k, v in diff2op_map.items():
 ops_map.update(ops_x_map)
 ops_map.update(ops_y_map)
 ops_map.update(diff2op_map)
-# ops_map.update(diff2op2_map)
+
+print(f'Paramaters Approximate Space: {whenop_map * pow(ops_map, chromosome_len-1) * x_lst * y_lst * day_lst * grp_lst}')
+# ops_map.update(whenop_map)
 
 # decay1op_map = {
 
@@ -353,65 +401,65 @@ def objective_scoring(raw_val, upper, lower, reverse = False):
         # return v# (sigmoid(val-2)-0.5) if val >= 0 else (sigmoid(val)-0.5)*3
 
 
-class OpTree:
-    def __init__(self, depth, x_lst, y_lst, d_lst, g_lst, ops_map):
-        self.depth = depth
-        self.root = self.generate_tree(depth, x_lst, y_lst, d_lst, g_lst, ops_map)
+# class OpTree:
+#     def __init__(self, depth, x_lst, y_lst, d_lst, g_lst, ops_map):
+#         self.depth = depth
+#         self.root = self.generate_tree(depth, x_lst, y_lst, d_lst, g_lst, ops_map)
 
-    def __repr__(self):
-        return self._repr_recursive(self.root)
+#     def __repr__(self):
+#         return self._repr_recursive(self.root)
 
-    def _repr_recursive(self, node):
-        if not node:
-            return ""
+#     def _repr_recursive(self, node):
+#         if not node:
+#             return ""
 
-        repr_string = repr(node)
-        # if isinstance(node, OP) and node.x:
-        #     repr_string += str(node)# f"{self._repr_recursive(node.x)}"
+#         repr_string = repr(node)
+#         # if isinstance(node, OP) and node.x:
+#         #     repr_string += str(node)# f"{self._repr_recursive(node.x)}"
 
-        return repr_string
+#         return repr_string
     
-    def generate_tree(self, depth, x_lst, y_lst, d_lst, g_lst, ops_map):
-        if depth == 0:
-            return OP(x_lst, y_lst, d_lst, g_lst, ops_map)
+#     def generate_tree(self, depth, x_lst, y_lst, d_lst, g_lst, ops_map):
+#         if depth == 0:
+#             return OP(x_lst, y_lst, d_lst, g_lst, ops_map)
 
-        op_node = OP(x_lst, y_lst, d_lst, g_lst, ops_map)
-        op_node.x = self.generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
-        op_node.y = self.generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
-        return op_node
+#         op_node = OP(x_lst, y_lst, d_lst, g_lst, ops_map)
+#         op_node.x = self.generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
+#         op_node.y = self.generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
+#         return op_node
     
 
-    def get_nth_op_parent(self, n, current_node=None, parent=None, counter=None):
-        if counter is None:
-            # Initialize a counter for tracking the number of encountered OPs
-            counter = [0]
+#     def get_nth_op_parent(self, n, current_node=None, parent=None, counter=None):
+#         if counter is None:
+#             # Initialize a counter for tracking the number of encountered OPs
+#             counter = [0]
 
-        if current_node is None:
-            current_node = self.root
+#         if current_node is None:
+#             current_node = self.root
 
-        if not current_node:
-            return None, None
+#         if not current_node:
+#             return None, None
 
-        if isinstance(current_node, OP):
-            # Increment the counter when an OP is encountered
-            counter[0] += 1
+#         if isinstance(current_node, OP):
+#             # Increment the counter when an OP is encountered
+#             counter[0] += 1
 
-            # Return the parent and the OP if it's the N-th one
-            if counter[0] == n:
-                return parent, current_node
+#             # Return the parent and the OP if it's the N-th one
+#             if counter[0] == n:
+#                 return parent, current_node
 
-        # Continue traversing the tree
-        return self.get_nth_op_parent(n, current_node.x, current_node, counter)
+#         # Continue traversing the tree
+#         return self.get_nth_op_parent(n, current_node.x, current_node, counter)
 
-    def modify_nth_op(self, n, new_op1, new_op2):
-        parent, nth_op = self.get_nth_op_parent(n)
+#     def modify_nth_op(self, n, new_op1, new_op2):
+#         parent, nth_op = self.get_nth_op_parent(n)
 
-        if parent and nth_op:
-            # Replace the N-th OP with the new OP
-            parent.x = new_op1
-            parent.y = new_op2
-        else:
-            print(f"There is no N-th OP in the tree.")
+#         if parent and nth_op:
+#             # Replace the N-th OP with the new OP
+#             parent.x = new_op1
+#             parent.y = new_op2
+#         else:
+#             print(f"There is no N-th OP in the tree.")
             
 
     # def get_nth_op(self, n):
@@ -429,7 +477,7 @@ class OpTree:
 def generate_tree(depth, x_lst, y_lst, d_lst, g_lst, ops_map):
     if depth <= 1:
         return OP(x_lst, y_lst, d_lst, g_lst, ops_map)
-
+    
     op_node = OP(x_lst, y_lst, d_lst, g_lst, ops_map)
     op_node.x = generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
     op_node.y = generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
@@ -441,7 +489,7 @@ def crossover(parent_a, parent_b):
 
 def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map, day_lst=day_lst, grp_lst=grp_lst):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
     # return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=bin_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
-    opt = generate_tree(2, x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) # OP( x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map
+    opt = generate_tree(chromosome_len, x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) # OP( x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map
     return opt
 # return OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
 
@@ -450,7 +498,8 @@ def gen_population(size):
     while len(population)<size:
         for i in range(size):
             exp = gen_expression()# OpTree(4, x_lst, y_lst, day_lst, grp_lst, ops_map)# gen_expression()
-            population.append(exp)
+            parent_node = OP([exp]+['ts_std_dev(returns, 5)', 'ts_std_dev(returns, 22)', 'ts_std_dev(returns, 66)', 'ts_std_dev(volume, 5)', 'ts_std_dev(volume, 22)', 'ts_corr(volume, ts_step(5), 5)', 'ts_corr(volume, ts_step(22), 22)', 'adv20'], exp, day_lst, grp_lst, whenop_map)
+            population.append(parent_node)
         population = list(set(population))
     return population
 
@@ -591,8 +640,7 @@ def evolution(verbose=False):
             if random.random() < MUTATION_RATE:
                 # rn = random.randint(int(child.depth/2), child.depth)
                 # child.modify_nth_op(child.depth, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map), OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
-                child = generate_tree(2, x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
-                    
+                child = generate_tree(chromosome_len, x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
                     #child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
                     #child.y.y.y.y = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
                 # else:
