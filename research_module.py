@@ -478,12 +478,12 @@ def generate_tree(depth):
     if depth <= 1:
         return OP(x_lst, y_lst, day_lst, grp_lst, ops_map)
     
-    when_val = ['ts_std_dev(returns, 5)', 'ts_std_dev(returns, 22)', 'ts_std_dev(returns, 66)', 'ts_std_dev(volume, 5)', 'ts_std_dev(volume, 22)', 'ts_corr(volume, ts_step(5), 5)', 'ts_corr(volume, ts_step(22), 22)', 'adv20']
+    when_val = ['ts_std_dev(returns, 5)', 'ts_std_dev(returns, 22)', 'ts_std_dev(returns, 66)', 'ts_std_dev(volume, 5)', 'ts_std_dev(volume, 22)', 'ts_corr(volume, ts_step(5), 5)', 'ts_corr(volume, ts_step(22), 22)', 'adv20', 'returns']
 
     op_node = OP(x_lst, y_lst, day_lst, grp_lst, ops_map)
     if depth == chromosome_len:
-        op_node.x_lst+=when_val
-        op_node.ops_map.update(whenop_map)
+        op_node = when_val
+        op_node.ops_map = whenop_map
         op_node.rnd()
         op_node.y = generate_tree(depth - 1)
     else:
