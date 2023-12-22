@@ -15,7 +15,7 @@ from alpha_module import Alpha, AlphaStage
 API_BASE = "https://api.worldquantbrain.com"
 
 REGION = 'USA'
-UNIVERSE = 'SECTOR_UTILITIES_TOP3000'
+UNIVERSE = 'TOP3000'
 DECAY = 0
 DELAY = 0
 NEUTRALIZATION = 'SUBINDUSTRY' 
