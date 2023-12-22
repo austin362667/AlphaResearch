@@ -14,15 +14,15 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'ASI'
-UNIVERSE = 'MINVOL1M'
+REGION = 'CHN'
+UNIVERSE = 'TOP3000'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'MARKET' 
+NEUTRALIZATION = 'SUBINDUSTRY' 
 
 DATASET_ID = 'model216'
 
-POPULATION_SIZE = 60
+POPULATION_SIZE = 100
 GENERATION_EPOCH = 20
 MUTATION_RATE = 0.25
 OS_RATIO = 0.8
@@ -627,7 +627,7 @@ def evolution(verbose=False):
                 if float(is_stats['turnover'])>0 and float(is_stats['returns'])>0 and float(is_stats['sharpe'])>0 and float(is_stats['fitness'])>0: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
                     score = (objective_scoring(float(is_stats['sharpe_lt']), 3, 1.5) + objective_scoring(float(is_stats['sharpe_st']), 4, 2) + objective_scoring(float(is_stats['fitness']), 3, 1.5) + objective_scoring(max(float(is_stats['turnover']), 0.1), 0.6, 0.3, True) + objective_scoring(float(is_stats['margin']), 20, 10) + objective_scoring(float(is_stats['drawdown']), 0.05, 0.01, True))/6 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
 
-                    if score:# and np.mean(sharpe_year[-3:-1])>0:#abs(np.mean(sharpe_year[-2:-1])/np.mean(sharpe_year[-3:-1])) > 0.6:
+                    if is_valid_number(score):# and np.mean(sharpe_year[-3:-1])>0:#abs(np.mean(sharpe_year[-2:-1])/np.mean(sharpe_year[-3:-1])) > 0.6:
                         for a_i in parent_population:
                             if str(a_i) == alpha_stats['regular']['code']:
                                 alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'fitness':is_stats['fitness'], 'sharpe':is_stats['sharpe'], 'margin': is_stats['margin'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
