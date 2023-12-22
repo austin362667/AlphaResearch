@@ -22,7 +22,7 @@ NEUTRALIZATION = 'MARKET'
 
 DATASET_ID = 'model216'
 
-POPULATION_SIZE = 100
+POPULATION_SIZE = 60
 GENERATION_EPOCH = 20
 MUTATION_RATE = 0.25
 OS_RATIO = 0.8
@@ -474,19 +474,19 @@ def objective_scoring(raw_val, upper, lower, reverse = False):
     #         return traverse(node.x)
     #     return traverse(self.root)
 
-def generate_tree(depth, x_lst, y_lst, d_lst, g_lst, ops_map):
+def generate_tree(depth):
     if depth <= 1:
-        return OP(x_lst, y_lst, d_lst, g_lst, ops_map)
+        return OP(x_lst, y_lst, day_lst, grp_lst, ops_map)
     
     when_val = ['ts_std_dev(returns, 5)', 'ts_std_dev(returns, 22)', 'ts_std_dev(returns, 66)', 'ts_std_dev(volume, 5)', 'ts_std_dev(volume, 22)', 'ts_corr(volume, ts_step(5), 5)', 'ts_corr(volume, ts_step(22), 22)', 'adv20']
 
-    op_node = OP(x_lst, y_lst, d_lst, g_lst, ops_map)
+    op_node = OP(x_lst, y_lst, day_lst, grp_lst, ops_map)
     if depth == chromosome_len:
         op_node.x_lst+=when_val
         op_node.ops_map.update(whenop_map)
     
-    op_node.x = generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
-    op_node.y = generate_tree(depth - 1, x_lst, y_lst, d_lst, g_lst, ops_map)
+    op_node.x = generate_tree(depth - 1)
+    op_node.y = generate_tree(depth - 1)
     
     # parent_node = OP(], y_lst, day_lst, grp_lst, whenop_map)
 
@@ -496,9 +496,9 @@ def crossover(parent_a, parent_b):
     merged_tree = merge_trees(parent_a, parent_b)
     return merged_tree
 
-def gen_expression(x_lst=x_lst, y_lst=y_lst, ops_map=ops_map, day_lst=day_lst, grp_lst=grp_lst):#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
+def gen_expression():#, ts_ops_map=ts1op_map, grp_ops_map=grp1op_map, bin_ops_map=diff2op_map, decay_ops_map=decay1op_map, day_lst=day_lst, grp_lst=grp_lst):
     # return OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, ops_map=bin_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=grp_ops_map, d_lst=day_lst, g_lst=grp_lst)], y_lst=y_lst, ops_map=decay_ops_map, d_lst=day_lst, g_lst=grp_lst)
-    opt = generate_tree(chromosome_len, x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) # OP( x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map
+    opt = generate_tree(chromosome_len) # OP( x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=[ OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map) ], y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map
     return opt
 # return OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
 
@@ -648,7 +648,7 @@ def evolution(verbose=False):
             if random.random() < MUTATION_RATE:
                 # rn = random.randint(int(child.depth/2), child.depth)
                 # child.modify_nth_op(child.depth, OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map), OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map))
-                child = generate_tree(chromosome_len, x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)
+                child = generate_tree(chromosome_len)
                     #child.x.x.x.x = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
                     #child.y.y.y.y = OP(x_lst=x_lst, y_lst=y_lst, d_lst=day_lst, g_lst=grp_lst, ops_map=ops_map)# gen_expression()
                 # else:
