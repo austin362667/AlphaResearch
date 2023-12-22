@@ -484,9 +484,11 @@ def generate_tree(depth):
     if depth == chromosome_len:
         op_node.x_lst+=when_val
         op_node.ops_map.update(whenop_map)
-    
-    op_node.x = generate_tree(depth - 1)
-    op_node.y = generate_tree(depth - 1)
+        op_node.rnd()
+        op_node.y = generate_tree(depth - 1)
+    else:
+        op_node.x = generate_tree(depth - 1)
+        op_node.y = generate_tree(depth - 1)
     
     # parent_node = OP(], y_lst, day_lst, grp_lst, whenop_map)
 
