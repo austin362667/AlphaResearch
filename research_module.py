@@ -26,7 +26,7 @@ POPULATION_SIZE = 100
 GENERATION_EPOCH = 20
 MUTATION_RATE = 0.25
 OS_RATIO = 0.8
-chromosome_len = 3
+chromosome_len = 2
 
 
 
