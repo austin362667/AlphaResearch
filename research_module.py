@@ -227,14 +227,14 @@ ops_x_map = {
 }
 
 whenop_map = {
-    'df_when_grk1': 'trade_when(group_rank({x}, {g})>0.5, {x}, -1)',
-    'df_when_grk0': 'trade_when(group_rank({x}, {g})<0.5, {x}, -1)',
-    'df_when_trk1': 'trade_when(ts_rank({x}, {d})>0.5, {x}, -1)',
-    'df_when_trk0': 'trade_when(ts_rank({x}, {d})<0.5, {x}, -1)',
-    'df_when_std05': 'trade_when(ts_std_dev({x}, {d})>0.5, {x}, -1)',
-    'df_when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {x}, -1)',
-    'df_when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {x}, -1)',
-    'df_when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {x}, -1)',
+    # 'df_when_grk1': 'trade_when(group_rank({x}, {g})>0.5, {x}, -1)',
+    # 'df_when_grk0': 'trade_when(group_rank({x}, {g})<0.5, {x}, -1)',
+    # 'df_when_trk1': 'trade_when(ts_rank({x}, {d})>0.5, {x}, -1)',
+    # 'df_when_trk0': 'trade_when(ts_rank({x}, {d})<0.5, {x}, -1)',
+    # 'df_when_std05': 'trade_when(ts_std_dev({x}, {d})>0.5, {x}, -1)',
+    # 'df_when_std1': 'trade_when(ts_std_dev({x}, {d})>1, {x}, -1)',
+    # 'df_when_std2': 'trade_when(ts_std_dev({x}, {d})>2, {x}, -1)',
+    # 'df_when_std3': 'trade_when(ts_std_dev({x}, {d})>3, {x}, -1)',
     
     'df_when_grk1_y': 'trade_when(group_rank({x}, {g})>0.5, {y}, -1)',
     'df_when_grk0_y': 'trade_when(group_rank({x}, {g})<0.5, {y}, -1)',
