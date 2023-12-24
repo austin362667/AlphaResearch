@@ -16,17 +16,17 @@ API_BASE = "https://api.worldquantbrain.com"
 
 REGION = 'ASI'
 UNIVERSE = 'MINVOL1M'
-DECAY = 0
+DECAY = 1
 DELAY = 1
 NEUTRALIZATION = 'SLOW_AND_FAST' 
 
 DATASET_ID = 'model216' #'other84' #'model216'
 
-POPULATION_SIZE = 70
+POPULATION_SIZE = 150
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
-chromosome_len = 2
+chromosome_len = 3
 
 
 
