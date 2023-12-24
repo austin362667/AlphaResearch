@@ -22,7 +22,7 @@ NEUTRALIZATION = 'SLOW_AND_FAST'
 
 DATASET_ID = 'model216' #'other84' #'model216'
 
-POPULATION_SIZE = 150
+POPULATION_SIZE = 70
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
@@ -619,6 +619,8 @@ def evolution(verbose=False):
                         return True
 
                 return False
+            def is_nan(x):
+                return (x is np.nan or x != x)
 
             alpha_stats = complete_alpha.response_data
             if True: #is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
@@ -634,7 +636,7 @@ def evolution(verbose=False):
                                 break
 
         alpha_rank_batch = sorted(alpha_batch, key=lambda x: x['score'], reverse=False)
-        
+        alpha_rank_batch = sorted(alpha_rank_batch, key = lambda x : float('-inf') if is_nan(x['score']) else x['score'])
         for v in alpha_rank_batch:
             # print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{v['fitness']}\t{v['sharpe']}\t{round(v['turnover']*100,2)}\t{round(v['returns']*100,2)}\t{round(v['drawdown']*100,2)}\t{round(v['margin']*10000,2)}") #\t{v['corr']>0.995}")
             print(f"https://platform.worldquantbrain.com/alpha/{v['id']} : Fitness: {round(v['fitness'], 2)} Sharpe: {round(v['sharpe'], 2)} Turnover: {round(v['turnover']*100,2)} Returns: {round((v['returns'])*100,2)} Turnover: {round((v['turnover'])*100,2)} Drawdown: {round((v['drawdown']),2)} Score: {round(v['score'],2)}") #\t{v['corr']>0.995}")
