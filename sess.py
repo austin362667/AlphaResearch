@@ -147,5 +147,5 @@ class BrainSession:
             time.sleep(10)
 while True:
     worker = BrainSession()
-    worker.stream_simulation(max_sim=10)
+    worker.stream_simulation(max_sim=9)
     time.sleep(30)
