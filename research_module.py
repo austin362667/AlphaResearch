@@ -14,19 +14,19 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'USA'
-UNIVERSE = 'SECTOR_UTILITIES_TOP3000'
+REGION = 'GLB'
+UNIVERSE = 'MINVOL1M'
 DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'MARKET' 
 
-DATASET_ID = 'other84' #'other84' #'model216'
+DATASET_ID = 'macro10' #'other84' #'model216'
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 50
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
-chromosome_len = 3
+chromosome_len = 2
 
 
 
@@ -114,8 +114,8 @@ try:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='VECTOR')
 except:
     data_lst = []
-data_x_lst = data_lst # ['opt4_60_call_vola_delta45'] # filter(lambda x: 'call' in x and 'vola' in x and 'delta' in x, data_lst)
-data_y_lst = data_lst # ['opt4_60_put_vola_delta45'] # filter(lambda x: 'put' in x and 'vola' in x and 'delta' in x, data_lst) #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
+data_x_lst = ['mcr10_value']#data_lst # ['opt4_60_call_vola_delta45'] # filter(lambda x: 'call' in x and 'vola' in x and 'delta' in x, data_lst)
+data_y_lst = ['mcr10_value']#data_lst # ['opt4_60_put_vola_delta45'] # filter(lambda x: 'put' in x and 'vola' in x and 'delta' in x, data_lst) #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 # vec_choose(), vec_norm()
 x_lst = [ f"ts_backfill(vec_avg({d}), 132)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
@@ -624,7 +624,7 @@ def evolution(verbose=False):
 
             alpha_stats = complete_alpha.response_data
             if True: #is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
-                n = 2 # 6 # 1
+                n = 6 # 1
                 is_stats = {'sharpe': np.mean(sharpe_year[n:-2]), 'sharpe_lt':  np.mean(sharpe_year[n:-2]), 'sharpe_st':  np.mean(sharpe_year[-4:-2]), 'fitness': np.mean(fitness_year[n:-2]), 'turnover': np.mean(turnover_year[n:-2]), 'margin': np.mean(margin_year[n:-2]), 'drawdown': np.mean(maxdrawdown_year[n:-2]), 'returns': np.mean(returns_year[n:-2])} # alpha_stats['is']
                 if float(is_stats['turnover'])>0 and float(is_stats['returns'])>0 and float(is_stats['sharpe'])>0 and float(is_stats['fitness'])>0: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
                     score = (objective_scoring(float(is_stats['sharpe_lt']), 3, 1.5) + objective_scoring(float(is_stats['sharpe_st']), 4, 2) + objective_scoring(float(is_stats['fitness']), 3, 1.5) + objective_scoring(max(float(is_stats['turnover']), 0.1), 0.5, 0.3, True) + objective_scoring(float(is_stats['margin']), 20, 10) + objective_scoring(float(is_stats['drawdown']), 0.05, 0.01, True))/6 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
