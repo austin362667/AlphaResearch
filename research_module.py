@@ -15,14 +15,16 @@ from alpha_module import Alpha, AlphaStage
 API_BASE = "https://api.worldquantbrain.com"
 
 REGION = 'USA'
-UNIVERSE = 'TOP3000'
+UNIVERSE = 'SECTOR_UTILITIES_TOP3000'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'SLOW_AND_FAST' 
+NEUTRALIZATION = 'MARKET' 
 
-DATASET_ID = 'model216' #'other84' #'model216'
+DATASET_ID = 'model10' #'other84' #'model216'
 
-POPULATION_SIZE = 100
+# model25, model165, model10
+
+POPULATION_SIZE = 200
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
@@ -641,7 +643,7 @@ def evolution(verbose=False):
         alpha_rank_batch = sorted(alpha_rank_batch, key = lambda x : float('-inf') if is_nan(x['score']) else x['score'])
         for v in alpha_rank_batch:
             # print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{v['fitness']}\t{v['sharpe']}\t{round(v['turnover']*100,2)}\t{round(v['returns']*100,2)}\t{round(v['drawdown']*100,2)}\t{round(v['margin']*10000,2)}") #\t{v['corr']>0.995}")
-            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} : Fitness: {round(v['fitness'], 2)} Sharpe: {round(v['sharpe'], 2)} Turnover: {round(v['turnover']*100,2)} Returns: {round((v['returns'])*100,2)} Turnover: {round((v['turnover'])*100,2)} Drawdown: {round((v['drawdown']),2)} Score: {round(v['score'],2)}") #\t{v['corr']>0.995}")
+            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} : Fitness: {round(v['fitness'], 2)} Sharpe: {round(v['sharpe'], 2)} Turnover: {round(v['turnover']*100,2)} Returns: {round((v['returns'])*100,2)} Margin: {round((v['margin']),2)} Drawdown: {round((v['drawdown']),2)} Score: {round(v['score'],2)}") #\t{v['corr']>0.995}")
 
         children_population = []
         batch_size /= 1.05
