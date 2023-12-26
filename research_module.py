@@ -28,7 +28,7 @@ POPULATION_SIZE = 200
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
-chromosome_len = 3
+chromosome_len = 2
 
 
 
@@ -484,13 +484,13 @@ def generate_tree(depth):
     
     when_val = ['ts_std_dev(returns, 5)', 'ts_std_dev(returns, 22)', 'ts_std_dev(returns, 66)', 'ts_std_dev(volume, 5)', 'ts_std_dev(volume, 22)', 'ts_corr(volume, ts_step(5), 5)', 'ts_corr(volume, ts_step(22), 22)', 'adv20', 'returns']
 
-    if depth == chromosome_len:
-        op_node = OP(when_val, y_lst, day_lst, grp_lst, whenop_map)
-        op_node.y = generate_tree(depth - 1)
-    else:
-        op_node = OP(x_lst, y_lst, day_lst, grp_lst, ops_map)
-        op_node.x = generate_tree(depth - 1)
-        op_node.y = generate_tree(depth - 1)
+    # if depth == chromosome_len:
+    #     op_node = OP(when_val, y_lst, day_lst, grp_lst, whenop_map)
+    #     op_node.y = generate_tree(depth - 1)
+    # else:
+    op_node = OP(x_lst, y_lst, day_lst, grp_lst, ops_map)
+    op_node.x = generate_tree(depth - 1)
+    op_node.y = generate_tree(depth - 1)
     
     # parent_node = OP(], y_lst, day_lst, grp_lst, whenop_map)
 
