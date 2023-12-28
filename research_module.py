@@ -24,7 +24,7 @@ DATASET_ID = 'model25' #'other84' #'model216'
 
 # model25, model165, model10
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 100
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
@@ -591,32 +591,41 @@ def evolution(verbose=False):
         for complete_file in complete_files:
             complete_alpha: Alpha = Alpha.load_from_disk(file_path=complete_file)
 
-            pnl_df = pd.read_csv(complete_alpha.response_data['pnl_path'])
-            pnl_df.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
-            pnl_df['Date'] = pd.to_datetime(pnl_df['Date'])
-            pnl_df = pnl_df.set_index("Date")
-            pnl_df = pd.DataFrame(pnl_df,columns=["Pnl"])
-            pnl_df['Return'] = (pnl_df['Pnl'].copy().diff() / 10000000)
+            # pnl_df = pd.read_csv(complete_alpha.response_data['pnl_path'])
+            # pnl_df.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
+            # pnl_df['Date'] = pd.to_datetime(pnl_df['Date'])
+            # pnl_df = pnl_df.set_index("Date")
+            # pnl_df = pd.DataFrame(pnl_df,columns=["Pnl"])
+            # pnl_df['Return'] = (pnl_df['Pnl'].copy().diff() / 10000000)
 
-            tvr_df = pd.read_csv(complete_alpha.response_data['tvr_path'])
-            tvr_df.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
-            tvr_df['Date'] = pd.to_datetime(tvr_df['Date'])
-            tvr_df = tvr_df.set_index("Date")
-            tvr_df = pd.DataFrame(tvr_df,columns=["Turnover"])
+            # tvr_df = pd.read_csv(complete_alpha.response_data['tvr_path'])
+            # tvr_df.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
+            # tvr_df['Date'] = pd.to_datetime(tvr_df['Date'])
+            # tvr_df = tvr_df.set_index("Date")
+            # tvr_df = pd.DataFrame(tvr_df,columns=["Turnover"])
 
             
-            pnl_df['Cumulative'] = pnl_df['Pnl'].round(2)
-            pnl_df['HighValue'] = pnl_df['Cumulative'].cummax()
-            pnl_df['Drawdown'] = (pnl_df['Cumulative'] - pnl_df['HighValue']) / pnl_df['HighValue']
-            pnl_df.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
-            maxdrawdown_year = [ -1*dd for dd in (pnl_df['Drawdown'].resample("Y").mean()).values.tolist()]
-            turnover_year = (tvr_df['Turnover'].resample("Y").mean()).values.tolist()
-            # returns_year = np.multiply((pnl_df['Return'].resample("Y").sum()).values.tolist(), (252/pnl_df['Pnl'].resample("Y").count()).values.tolist())
-            returns_year = (pnl_df['Return'].resample("Y").sum()).values.tolist()
-            sharpe_year = ((pnl_df['Return'].resample("Y").mean() /  (pnl_df['Return'].resample("Y")).std())*math.sqrt(252)).values.tolist()
-            margin_year = ((pnl_df['Pnl'].resample("Y").last() / (tvr_df['Turnover'].resample("Y").mean() * (2*10000000))).resample("Y").mean()*10000).values.tolist()
-            fitness_year = sharpe_year * np.sqrt(np.divide([ abs(ret) for ret in returns_year ], [ max(tvr, 0.125) for tvr in turnover_year])) 
+            # pnl_df['Cumulative'] = pnl_df['Pnl'].round(2)
+            # pnl_df['HighValue'] = pnl_df['Cumulative'].cummax()
+            # pnl_df['Drawdown'] = (pnl_df['Cumulative'] - pnl_df['HighValue']) / pnl_df['HighValue']
+            # pnl_df.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
+            # maxdrawdown_year = [ -1*dd for dd in (pnl_df['Drawdown'].resample("Y").mean()).values.tolist()]
+            # turnover_year = (tvr_df['Turnover'].resample("Y").mean()).values.tolist()
+            # # returns_year = np.multiply((pnl_df['Return'].resample("Y").sum()).values.tolist(), (252/pnl_df['Pnl'].resample("Y").count()).values.tolist())
+            # returns_year = (pnl_df['Return'].resample("Y").sum()).values.tolist()
+            # sharpe_year = ((pnl_df['Return'].resample("Y").mean() /  (pnl_df['Return'].resample("Y")).std())*math.sqrt(252)).values.tolist()
+            # margin_year = ((pnl_df['Pnl'].resample("Y").last() / (tvr_df['Turnover'].resample("Y").mean() * (2*10000000))).resample("Y").mean()*10000).values.tolist()
+            # fitness_year = sharpe_year * np.sqrt(np.divide([ abs(ret) for ret in returns_year ], [ max(tvr, 0.125) for tvr in turnover_year])) 
             
+
+            yearly_stat_lst = (worker_sess.get(f"https://api.worldquantbrain.com/alphas/{id}/recordsets/yearly-stats")).json()['records']
+            turnover_year = [ y[5] for y in yearly_stat_lst ] # percent
+            sharpe_year = [ y[6] for y in yearly_stat_lst ] # decimal
+            returns_year = [ y[7] for y in yearly_stat_lst ] # percent
+            maxdrawdown_year = [ y[8] for y in yearly_stat_lst ] # percent    
+            margin_year = [ y[9] for y in yearly_stat_lst ] # permyriad     
+            fitness_year  = [ y[10] for y in yearly_stat_lst ] # decimal
+
             def is_valid_number(value):
                 if isinstance(value, numbers.Number) and not isinstance(value, complex):
                     if value not in {float('inf'), float('-inf'), float('nan'), None}:
@@ -629,21 +638,21 @@ def evolution(verbose=False):
             alpha_stats = complete_alpha.response_data
             if True: #is_valid_number(np.mean(turnover_year)) and is_valid_number(np.mean(sharpe_year)) and is_valid_number(np.mean(returns_year)) and is_valid_number(np.mean(maxdrawdown_year)) and is_valid_number(np.mean(margin_year)) and is_valid_number(np.mean(fitness_year)): 
                 n = 0 # 1
-                is_stats = {'sharpe': np.mean(sharpe_year[n:-2]), 'sharpe_lt':  np.mean(sharpe_year[n:-2]), 'sharpe_st':  np.mean(sharpe_year[-4:-2]), 'fitness': np.mean(fitness_year[n:-2]), 'turnover': np.mean(turnover_year[n:-2]), 'margin': np.mean(margin_year[n:-2]), 'drawdown': np.mean(maxdrawdown_year[n:-2]), 'returns': np.mean(returns_year[n:-2])} # alpha_stats['is']
-                if float(is_stats['turnover'])>0 and float(is_stats['returns'])>0 and float(is_stats['sharpe'])>0 and float(is_stats['fitness'])>0: #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
-                    score = (objective_scoring(float(is_stats['sharpe_lt']), 3, 1.5) + objective_scoring(float(is_stats['sharpe_st']), 4, 2) + objective_scoring(float(is_stats['fitness']), 3, 1.5) + objective_scoring(max(float(is_stats['turnover']), 0.1), 0.5, 0.2, True)  + objective_scoring(float(is_stats['returns']), 0.05, 0.15))/5 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
+                is_stats = {'sharpe': np.average(sharpe_year[n:-2], weights=[w for w in range(len(sharpe_year[n:-2]))]), 'fitness': np.mean(fitness_year[n:-2]), 'turnover': np.mean(turnover_year[n:-2]), 'margin': np.mean(margin_year[n:-2]), 'drawdown': np.mean(maxdrawdown_year[n:-2]), 'returns': np.mean(returns_year[n:-2])} # alpha_stats['is']
+                #float(is_stats['sharpe_st'])>0 and float(is_stats['sharpe_lt'])>0 and float(is_stats['turnover'])>0.01 and float(is_stats['turnover'])<1 and float(is_stats['drawdown']) < 0.5:
+                score = (objective_scoring(float(is_stats['sharpe']), 4, 1.8) + objective_scoring(float(is_stats['fitness']), 3, 1.5) + objective_scoring(max(float(is_stats['turnover']), 0.08), 0.4, 0.15, True)  + objective_scoring(float(is_stats['returns']), 0.25, 0.13) + objective_scoring(float(is_stats['margin']), 0.003, 0.001) + objective_scoring(float(is_stats['drawdown']), 0.015, 0.001), True)/6 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
 
-                    if score != None and is_valid_number(score) and (int(alpha_stats['is']['longCount'])+int(alpha_stats['is']['shortCount']))>500:# and np.mean(sharpe_year[-3:-1])>0:#abs(np.mean(sharpe_year[-2:-1])/np.mean(sharpe_year[-3:-1])) > 0.6:
-                        for a_i in parent_population:
-                            if str(a_i) == alpha_stats['regular']['code']:
-                                alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'fitness':is_stats['fitness'], 'sharpe':is_stats['sharpe'], 'margin': is_stats['margin'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
-                                break
+                if score != None and is_valid_number(score) and (int(alpha_stats['is']['longCount'])+int(alpha_stats['is']['shortCount']))>500:# and np.mean(sharpe_year[-3:-1])>0:#abs(np.mean(sharpe_year[-2:-1])/np.mean(sharpe_year[-3:-1])) > 0.6:
+                    for a_i in parent_population:
+                        if str(a_i) == alpha_stats['regular']['code']:
+                            alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'fitness':is_stats['fitness'], 'sharpe':is_stats['sharpe'], 'margin': is_stats['margin'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
+                            break
 
         alpha_rank_batch = sorted(alpha_batch, key=lambda x: x['score'], reverse=False)
         alpha_rank_batch = sorted(alpha_rank_batch, key = lambda x : float('-inf') if is_nan(x['score']) else x['score'])
         for v in alpha_rank_batch:
             # print(f"https://platform.worldquantbrain.com/alpha/{v['id']} :\t{round(v['score'], 2)}\t{v['fitness']}\t{v['sharpe']}\t{round(v['turnover']*100,2)}\t{round(v['returns']*100,2)}\t{round(v['drawdown']*100,2)}\t{round(v['margin']*10000,2)}") #\t{v['corr']>0.995}")
-            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} : Fitness: {round(v['fitness'], 2)} Sharpe: {round(v['sharpe'], 2)} Turnover: {round(v['turnover']*100,2)} Returns: {round((v['returns'])*100,2)} Margin: {round((v['margin']),2)} Drawdown: {round((v['drawdown']),2)} Score: {round(v['score'],2)}") #\t{v['corr']>0.995}")
+            print(f"https://platform.worldquantbrain.com/alpha/{v['id']} : Fitness: {round(v['fitness'], 2)} Sharpe: {round(v['sharpe'], 2)} Turnover: {round(v['turnover']*100,2)} Returns: {round((v['returns'])*100,2)} Margin: {round(float(v['margin'])*10000,2)} Drawdown: {round(float(v['drawdown'])*100,2)} Score: {round(v['score'],3)}") #\t{v['corr']>0.995}")
 
         children_population = []
         batch_size /= 1.05
