@@ -20,7 +20,7 @@ DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'SUBINDUSTRY' 
 
-DATASET_ID = 'model25' #'other84' #'model216'
+DATASET_ID = 'sentiment1' #'other84' #'model216'
 
 # model25, model165, model10
 
