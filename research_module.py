@@ -578,7 +578,7 @@ def get_alpha_stats(s, alpha_id):
     if stats == 0:
         return pd.DataFrame()
     stats_df = (
-        pd.DataFrame(stats_df, columns=["Year", "PnL", "Book Size", "Long Count", "Short Count", "Turnover", "Sharpe", "Returns", "Drawdown", "Margin", "Fitness", "Stage"])
+        pd.DataFrame(stats, columns=["Year", "PnL", "Book Size", "Long Count", "Short Count", "Turnover", "Sharpe", "Returns", "Drawdown", "Margin", "Fitness", "Stage"])
         .assign(
             alpha_id=alpha_id
         )
