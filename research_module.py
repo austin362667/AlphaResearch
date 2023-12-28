@@ -24,7 +24,7 @@ DATASET_ID = 'model25' #'other84' #'model216'
 
 # model25, model165, model10
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 20
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
@@ -565,6 +565,27 @@ def calculate_max_drawdown(cumulative_pnl):
 
     return max_drawdown
 
+def get_alpha_stats(s, alpha_id):
+    while True:
+        result = s.get(
+            f"https://api.worldquantbrain.com/alphas/{alpha_id}/recordsets/yearly-stats"
+        )
+        if "retry-after" in result.headers:
+            time.sleep(float(result.headers["Retry-After"]))
+        else:
+            break
+    stats = result.json().get("records", 0)
+    if stats == 0:
+        return pd.DataFrame()
+    stats_df = (
+        pd.DataFrame(stats_df, columns=["Year", "PnL", "Book Size", "Long Count", "Short Count", "Turnover", "Sharpe", "Returns", "Drawdown", "Margin", "Fitness", "Stage"])
+        .assign(
+            alpha_id=alpha_id
+        )
+        .set_index("Date")
+    )
+    return stats_df#.diff(1) # .tolist()
+
 
 
 def evolution(verbose=False):
@@ -617,15 +638,23 @@ def evolution(verbose=False):
             # margin_year = ((pnl_df['Pnl'].resample("Y").last() / (tvr_df['Turnover'].resample("Y").mean() * (2*10000000))).resample("Y").mean()*10000).values.tolist()
             # fitness_year = sharpe_year * np.sqrt(np.divide([ abs(ret) for ret in returns_year ], [ max(tvr, 0.125) for tvr in turnover_year])) 
             # print(complete_alpha.response_data['id'])
-            yearly_stats = worker_sess.get(f"https://api.worldquantbrain.com/alphas/{complete_alpha.response_data['id']}/recordsets/yearly-stats")
-            # print(yearly_stats)
-            yearly_stat_lst = yearly_stats.json().get("records", 0)
-            turnover_year = [ y[5] for y in yearly_stat_lst ] # percent
-            sharpe_year = [ y[6] for y in yearly_stat_lst ] # decimal
-            returns_year = [ y[7] for y in yearly_stat_lst ] # percent
-            maxdrawdown_year = [ y[8] for y in yearly_stat_lst ] # percent    
-            margin_year = [ y[9] for y in yearly_stat_lst ] # permyriad     
-            fitness_year  = [ y[10] for y in yearly_stat_lst ] # decimal
+            # ＃yearly_stats = #worker_sess.get(f"https://api.worldquantbrain.com/alphas/{complete_alpha.response_data['id']}/recordsets/yearly-stats")
+            # # print(yearly_stats)
+            # yearly_stat_lst = yearly_stats.json().get("records", 0)
+            # turnover_year = [ y[5] for y in yearly_stat_lst ] # percent
+            # sharpe_year = [ y[6] for y in yearly_stat_lst ] # decimal
+            # returns_year = [ y[7] for y in yearly_stat_lst ] # percent
+            # maxdrawdown_year = [ y[8] for y in yearly_stat_lst ] # percent    
+            # margin_year = [ y[9] for y in yearly_stat_lst ] # permyriad     
+            # fitness_year  = [ y[10] for y in yearly_stat_lst ] # decimal
+
+            stats_df = get_alpha_stats(worker_sess, f"{complete_alpha.response_data['id']}")
+            sharpe_year = stats_df['Sharpe']
+            turnover_year = stats_df['Turnover']
+            fitness_year = stats_df['Fitness']
+            returns_year = stats_df['Returns']
+            maxdrawdown_year = stats_df['Drawdown']
+            margin_year = stats_df['Margin']
 
             def is_valid_number(value):
                 if isinstance(value, numbers.Number) and not isinstance(value, complex):
