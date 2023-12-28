@@ -24,7 +24,7 @@ DATASET_ID = 'model25' #'other84' #'model216'
 
 # model25, model165, model10
 
-POPULATION_SIZE = 40
+POPULATION_SIZE = 200
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
@@ -648,7 +648,7 @@ def evolution(verbose=False):
                 os_stats = {'sharpe': np.average(sharpe_year[n_os_s:n_os_e], weights=[w for w in range(len(sharpe_year[n_os_s:n_os_e]))]), 'fitness': np.mean(fitness_year[n_os_s:n_os_e]), 'turnover': np.mean(turnover_year[n_os_s:n_os_e]), 'margin': np.mean(margin_year[n_os_s:n_os_e]), 'drawdown': np.mean(maxdrawdown_year[n_os_s:n_os_e]), 'returns': np.mean(returns_year[n_os_s:n_os_e])} # alpha_stats['is']
                 os_score = (objective_scoring(float(os_stats['sharpe']), 4, 1.8) + objective_scoring(float(os_stats['fitness']), 3, 1.5) + objective_scoring(max(float(os_stats['turnover']), 0.08), 0.4, 0.15, True)  + objective_scoring(float(os_stats['returns']), 0.25, 0.13) + objective_scoring(float(os_stats['margin']), 0.003, 0.001) + objective_scoring(float(os_stats['drawdown']), 0.015, 0.001, True))/6 # (objective_scoring(float(is_stats['fitness']), 1.5) + objective_scoring(float(is_stats['sharpe']), 1.6) + objective_scoring(float(is_stats['turnover']), 0.2, True) + objective_scoring(float(is_stats['returns']), 0.2) + objective_scoring(float(is_stats['drawdown']), 0.02, True) + objective_scoring(float(is_stats['margin']), 0.0015))/6
 
-                if score != None and is_valid_number(score) and (int(alpha_stats['is']['longCount'])+int(alpha_stats['is']['shortCount']))>500 and (os_score-score)/abs(score)>0:# and np.mean(sharpe_year[-3:-1])>0:#abs(np.mean(sharpe_year[-2:-1])/np.mean(sharpe_year[-3:-1])) > 0.6:
+                if score != None and is_valid_number(score) and (int(alpha_stats['is']['longCount'])+int(alpha_stats['is']['shortCount']))>500 and (os_score-score)/abs(score) > -0.5:# and np.mean(sharpe_year[-3:-1])>0:#abs(np.mean(sharpe_year[-2:-1])/np.mean(sharpe_year[-3:-1])) > 0.6:
                     for a_i in parent_population:
                         if str(a_i) == alpha_stats['regular']['code']:
                             alpha_batch.append({'id': alpha_stats['id'], 'score': score, 'data': a_i, 'fitness':is_stats['fitness'], 'sharpe':is_stats['sharpe'], 'margin': is_stats['margin'], 'turnover':is_stats['turnover'], 'drawdown': is_stats['drawdown'], 'returns': is_stats['returns']}) # , 'fitness': is_stats['fitness'], 'returns': is_stats['returns'], 'drawdown': is_stats['drawdown'], 'margin': is_stats['margin']
