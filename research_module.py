@@ -24,7 +24,7 @@ DATASET_ID = 'model25' #'other84' #'model216'
 
 # model25, model165, model10
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 5
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
@@ -617,8 +617,8 @@ def evolution(verbose=False):
             # margin_year = ((pnl_df['Pnl'].resample("Y").last() / (tvr_df['Turnover'].resample("Y").mean() * (2*10000000))).resample("Y").mean()*10000).values.tolist()
             # fitness_year = sharpe_year * np.sqrt(np.divide([ abs(ret) for ret in returns_year ], [ max(tvr, 0.125) for tvr in turnover_year])) 
             
-
-            yearly_stat_lst = (worker_sess.get(f"https://api.worldquantbrain.com/alphas/{complete_alpha.response_data['id']}/recordsets/yearly-stats")).json()['records']
+            yearly_stats = (worker_sess.get(f"https://api.worldquantbrain.com/alphas/{complete_alpha.response_data['id']}/recordsets/yearly-stats")).json()
+            yearly_stat_lst = yearly_stats['records']
             turnover_year = [ y[5] for y in yearly_stat_lst ] # percent
             sharpe_year = [ y[6] for y in yearly_stat_lst ] # decimal
             returns_year = [ y[7] for y in yearly_stat_lst ] # percent
