@@ -582,7 +582,6 @@ def get_alpha_stats(s, alpha_id):
         .assign(
             alpha_id=alpha_id
         )
-        .set_index("Date")
     )
     return stats_df#.diff(1) # .tolist()
 
