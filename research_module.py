@@ -24,7 +24,7 @@ DATASET_ID = 'sentiment1' #'other84' #'model216'
 
 # model25, model165, model10
 
-POPULATION_SIZE = 20
+POPULATION_SIZE = 50
 GENERATION_EPOCH = 30
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
