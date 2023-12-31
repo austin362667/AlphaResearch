@@ -18,9 +18,9 @@ REGION = 'USA'
 UNIVERSE = 'TOP3000'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'FAST' 
+NEUTRALIZATION = 'SLOW_AND_FAST' 
 
-DATASET_ID = 'institutions8' #'other84' #'model216'
+DATASET_ID = 'earnings1' #'other84' #'model216'
 
 # model25, model165, model10
 
@@ -201,6 +201,11 @@ ops_x_map = {
     'grp_div_median': '{x}/group_median({x}, {g})',
     'grp_div_mean': '{x}/group_mean({x}, 1, {g})',
     'x': '({x})',
+    'x_': '({x})',
+    'x__': '({x})',
+    'x___': '({x})',
+    'x____': '({x})',
+    'x_____': '({x})',
     'tanh': 'tanh({x})',
     'sigmoid': 'sigmoid({x})',
     'exp': 'exp({x})',
@@ -304,6 +309,7 @@ for k, v in diff2op_map.items():
 ops_map.update(ops_x_map)
 ops_map.update(ops_y_map)
 ops_map.update(diff2op_map)
+ops_map.update(diff2op2_map)
 
 print(f'Paramaters Approximate Space: {len(whenop_map) * pow(len(ops_map), chromosome_len-1) * len(x_lst) * len(y_lst) * len(day_lst) * len(grp_lst)}')
 # ops_map.update(whenop_map)
