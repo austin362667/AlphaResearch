@@ -14,11 +14,11 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'ASI'
-UNIVERSE = 'MINVOL1M'
+REGION = 'USA'
+UNIVERSE = 'TOP3000'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'MARKET' 
+NEUTRALIZATION = 'SLOW_AND_FAST' 
 
 DATASET_ID = 'model216' #'other84' #'model216'
 
