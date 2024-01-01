@@ -15,7 +15,7 @@ from alpha_module import Alpha, AlphaStage
 API_BASE = "https://api.worldquantbrain.com"
 
 REGION = 'ASI'
-UNIVERSE = 'TOP3000'
+UNIVERSE = 'MINVOL1M'
 DECAY = 0
 DELAY = 1
 NEUTRALIZATION = 'MARKET' 
