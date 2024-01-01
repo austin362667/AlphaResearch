@@ -14,18 +14,18 @@ from alpha_module import Alpha, AlphaStage
 
 API_BASE = "https://api.worldquantbrain.com"
 
-REGION = 'USA'
+REGION = 'ASI'
 UNIVERSE = 'TOP3000'
 DECAY = 0
 DELAY = 1
-NEUTRALIZATION = 'SLOW_AND_FAST' 
+NEUTRALIZATION = 'MARKET' 
 
-DATASET_ID = 'earnings1' #'other84' #'model216'
+DATASET_ID = 'model216' #'other84' #'model216'
 
 # model25, model165, model10
 
-POPULATION_SIZE = 50
-GENERATION_EPOCH = 30
+POPULATION_SIZE = 100
+GENERATION_EPOCH = 50
 MUTATION_RATE = 0.3
 OS_RATIO = 0.8
 chromosome_len = 2
@@ -249,10 +249,19 @@ whenop_map = {
     'df_when_grk0_y': 'trade_when(group_rank({x}, {g})<0.5, {y}, -1)',
     'df_when_trk1_y': 'trade_when(ts_rank({x}, {d})>0.5, {y}, -1)',
     'df_when_trk0_y': 'trade_when(ts_rank({x}, {d})<0.5, {y}, -1)',
+    'df_when_std-05_y': 'trade_when(ts_std_dev({x}, {d})<0.5, {y}, -1)',
     'df_when_std05_y': 'trade_when(ts_std_dev({x}, {d})>0.5, {y}, -1)',
     'df_when_std1_y': 'trade_when(ts_std_dev({x}, {d})>1, {y}, -1)',
     'df_when_std2_y': 'trade_when(ts_std_dev({x}, {d})>2, {y}, -1)',
     'df_when_std3_y': 'trade_when(ts_std_dev({x}, {d})>3, {y}, -1)',
+    'df_sma5': 'trade_when(ts_mean({x}, 5)>ts_mean({x}, {d}), {y}, -1)',
+    'df_sma10': 'trade_when(ts_mean({x}, 10)>ts_mean({x}, {d}), {y}, -1)',
+    'df_sma22': 'trade_when(ts_mean({x}, 22)>ts_mean({x}, {d}), {y}, -1)',
+    'df_sma66': 'trade_when(ts_mean({x}, 66)>ts_mean({x}, {d}), {y}, -1)',
+    'df_sma5_r': 'trade_when(ts_mean({x}, 5)<ts_mean({x}, {d}), {y}, -1)',
+    'df_sma10_r': 'trade_when(ts_mean({x}, 10)<ts_mean({x}, {d}), {y}, -1)',
+    'df_sma22_r': 'trade_when(ts_mean({x}, 22)<ts_mean({x}, {d}), {y}, -1)',
+    'df_sma66_r': 'trade_when(ts_mean({x}, 66)<ts_mean({x}, {d}), {y}, -1)',
 }
 
 
@@ -488,15 +497,15 @@ def generate_tree(depth):
     if depth <= 1:
         return OP(x_lst, y_lst, day_lst, grp_lst, ops_map)
     
-    when_val = ['ts_std_dev(returns, 5)', 'ts_std_dev(returns, 22)', 'ts_std_dev(returns, 66)', 'ts_std_dev(volume, 5)', 'ts_std_dev(volume, 22)', 'ts_corr(volume, ts_step(5), 5)', 'ts_corr(volume, ts_step(22), 22)', 'adv20', 'returns']
+    when_val = ['adv20', 'returns', 'volume', 'close', 'vwap', 'open', 'high', 'low']
 
-    # if depth == chromosome_len:
-    #     op_node = OP(when_val, y_lst, day_lst, grp_lst, whenop_map)
-    #     op_node.y = generate_tree(depth - 1)
-    # else:
-    op_node = OP(x_lst, y_lst, day_lst, grp_lst, ops_map)
-    op_node.x = generate_tree(depth - 1)
-    op_node.y = generate_tree(depth - 1)
+    if depth == chromosome_len:
+        op_node = OP(when_val, y_lst, day_lst, grp_lst, whenop_map)
+        op_node.y = generate_tree(depth - 1)
+    else:
+        op_node = OP(x_lst, y_lst, day_lst, grp_lst, ops_map)
+        op_node.x = generate_tree(depth - 1)
+        op_node.y = generate_tree(depth - 1)
     
     # parent_node = OP(], y_lst, day_lst, grp_lst, whenop_map)
 
