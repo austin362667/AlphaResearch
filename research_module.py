@@ -118,8 +118,8 @@ except:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='VECTOR')
     data_lst = [ f"vec_avg({d})" for d in data_lst ] + [ f"vec_choose({d}, nth = -1)" for d in data_lst ] + [ f"vec_sum({d})" for d in data_lst ] + [ f"vec_norm({d})" for d in data_lst ]
 
-data_x_lst = ['fnd13_qred'] # data_lst # ['opt4_60_call_vola_delta45']#filter(lambda x: 'call' in x , data_lst # ['opt4_60_call_vola_delta45'] # 
-data_y_lst = ['cap'] # data_lst # ['opt4_60_put_vola_delta45']#filter(lambda x: 'put' in x , data_lst) # ['opt4_60_put_vola_delta45'] #  #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
+data_x_lst = data_lst # ['opt4_60_call_vola_delta45']#filter(lambda x: 'call' in x , data_lst # ['opt4_60_call_vola_delta45'] # 
+data_y_lst = data_lst # ['opt4_60_put_vola_delta45']#filter(lambda x: 'put' in x , data_lst) # ['opt4_60_put_vola_delta45'] #  #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
 # vec_choose(), vec_norm()
 x_lst = [ f"ts_backfill(({d}), 132)" for d in data_x_lst ] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)'] # [ f"ts_backfill(({d}), 252)" for d in data_lst ] # ['ts_backfill(vwap, 252)'] # ['ts_backfill(vec_avg(oth84_1_wshactualeps), 132)']
