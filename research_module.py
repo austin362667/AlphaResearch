@@ -24,11 +24,11 @@ DATASET_ID = 'model4' #'other84' #'model216'
 
 # model25, model165, model10
 
-POPULATION_SIZE = 200
-GENERATION_EPOCH = 5
-MUTATION_RATE = 0.2
+POPULATION_SIZE = 50
+GENERATION_EPOCH = 30
+MUTATION_RATE = 0.3
 OS_RATIO = 0.8
-chromosome_len = 1
+chromosome_len = 2
 
 
 
@@ -117,7 +117,7 @@ try:
 except:
     data_lst = get_datafields(worker_sess, dataset_id=f'{DATASET_ID}', region=f'{REGION}', delay=DELAY, universe=f'{UNIVERSE}', datafield_type='VECTOR')
     data_lst = [ f"vec_avg({d})" for d in data_lst ] + [ f"vec_choose({d}, nth = -1)" for d in data_lst ] + [ f"vec_sum({d})" for d in data_lst ] + [ f"vec_norm({d})" for d in data_lst ]
-
+data_lst = ['subtract(ts_b, ackfill((mdl4_colalphapct), 132), ts_backfill((mdl4_divyieldrnk), 132))', 'ts_backfill((mdl4_colalphapct), 132)-group_mean(ts_backfill((mdl4_colalphapct), 132), adv20, densify(oth455_competitor_n2v_p10_q200_w2_kmeans_cluster_20))', 'ts_min_max_cps(ts_backfill((mdl4_colalpharnk), 132), 66, f = 2)', 'ts_min_max_cps(ts_backfill((mdl4_colalpharnk), 132), 66, f = 2)', 'divide(ts_backfill((mdl4_industrygroupduplicate), 132), ts_backfill((mdl4_colalpharnk), 132))']
 data_x_lst = data_lst # ['opt4_60_call_vola_delta45']#filter(lambda x: 'call' in x , data_lst # ['opt4_60_call_vola_delta45'] # 
 data_y_lst = data_lst # ['opt4_60_put_vola_delta45']#filter(lambda x: 'put' in x , data_lst) # ['opt4_60_put_vola_delta45'] #  #data_lst # ['close', 'eps' , 'cap', 'capex', 'equity', 'cash', 'cashflow', 'debt', 'debt_st', 'debt_lt', 'assets', 'adv20', 'volume']
 
@@ -499,7 +499,7 @@ def generate_tree(depth):
     
     when_val = ['adv20', 'returns', 'volume', 'close', 'vwap', 'open', 'high', 'low']
 
-    if depth == chromosome_len+1:
+    if depth == chromosome_len:
         op_node = OP(when_val, y_lst, day_lst, grp_lst, whenop_map)
         op_node.y = generate_tree(depth - 1)
     else:
